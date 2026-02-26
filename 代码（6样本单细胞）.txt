@@ -1,0 +1,749 @@
+unzip MC38皮下成瘤外周血PD1单细胞表面RNA/Mc38-PD1B3.UMITask.matrix.zip -d MC38皮下成瘤外周血PD1单细胞表面RNA/Mc38-PD1B3.UMITask.matrix
+library(Seurat)
+library(tidyverse)
+library(patchwork)
+library(batchelor)
+library(harmony)
+library(SeuratWrappers)
+rm(list=ls())
+setwd("MC38皮下成瘤外周血PD1单细胞表面RNA")
+Tumor_Ctrl1 <- Read10X(data.dir = "Mc38-TumorT1.UMITask.matrix/filtered_feature_bc_matrix")
+Tumor_Ctrl1 <- CreateSeuratObject(counts = Tumor_Ctrl1,project = "Tumor_Ctrl1",min.cells = 3,min.features = 200)
+Tumor_Ctrl1[["percent.mt"]] <- PercentageFeatureSet(Tumor_Ctrl1,pattern = "^mt-")
+p1 <- VlnPlot(Tumor_Ctrl1,features = c("nFeature_RNA","nCount_RNA","percent.mt"))
+ggsave("violinplot.pdf",plot = p1)
+Tumor_Ctrl1 <- subset(Tumor_Ctrl1,subset = nFeature_RNA > 200 & nFeature_RNA < 5000 & percent.mt < 8)
+Tumor_Ctrl1 <- NormalizeData(Tumor_Ctrl1,normalization.method = "LogNormalize",scale.factor = 10000)
+Tumor_Ctrl2 <- Read10X(data.dir = "Mc38-TumorT2.UMITask.matrix/filtered_feature_bc_matrix")
+Tumor_Ctrl2 <- CreateSeuratObject(counts = Tumor_Ctrl2,project = "Tumor_Ctrl2",min.cells = 3,min.features = 200)
+Tumor_Ctrl2[["percent.mt"]] <- PercentageFeatureSet(Tumor_Ctrl2,pattern = "^mt-")
+p1 <- VlnPlot(Tumor_Ctrl2,features = c("nFeature_RNA","nCount_RNA","percent.mt"))
+ggsave("violinplot.pdf",plot = p1)
+Tumor_Ctrl2 <- subset(Tumor_Ctrl2,subset = nFeature_RNA > 200 & nFeature_RNA < 5000 & percent.mt < 8)
+Tumor_Ctrl2 <- NormalizeData(Tumor_Ctrl2,normalization.method = "LogNormalize",scale.factor = 10000)
+Tumor_Ctrl3 <- Read10X(data.dir = "Mc38-TumorT3.UMITask.matrix/filtered_feature_bc_matrix")
+Tumor_Ctrl3 <- CreateSeuratObject(counts = Tumor_Ctrl3,project = "Tumor_Ctrl3",min.cells = 3,min.features = 200)
+Tumor_Ctrl3[["percent.mt"]] <- PercentageFeatureSet(Tumor_Ctrl3,pattern = "^mt-")
+p1 <- VlnPlot(Tumor_Ctrl3,features = c("nFeature_RNA","nCount_RNA","percent.mt"))
+ggsave("violinplot.pdf",plot = p1)
+Tumor_Ctrl3 <- subset(Tumor_Ctrl3,subset = nFeature_RNA > 200 & nFeature_RNA < 5000 & percent.mt < 8)
+Tumor_Ctrl3 <- NormalizeData(Tumor_Ctrl3,normalization.method = "LogNormalize",scale.factor = 10000)
+Tumor_PD1_1 <- Read10X(data.dir = "Mc38-PD1T1.UMITask.matrix/filtered_feature_bc_matrix")
+Tumor_PD1_1 <- CreateSeuratObject(counts = Tumor_PD1_1,project = "Tumor_PD1_1",min.cells = 3,min.features = 200)
+Tumor_PD1_1[["percent.mt"]] <- PercentageFeatureSet(Tumor_PD1_1,pattern = "^mt-")
+p1 <- VlnPlot(Tumor_PD1_1,features = c("nFeature_RNA","nCount_RNA","percent.mt"))
+ggsave("violinplot.pdf",plot = p1)
+Tumor_PD1_1 <- subset(Tumor_PD1_1,subset = nFeature_RNA > 200 & nFeature_RNA < 5000 & percent.mt < 8)
+Tumor_PD1_1 <- NormalizeData(Tumor_PD1_1,normalization.method = "LogNormalize",scale.factor = 10000)
+Tumor_PD1_2 <- Read10X(data.dir = "Mc38-PD1T2.UMITask.matrix/filtered_feature_bc_matrix")
+Tumor_PD1_2 <- CreateSeuratObject(counts = Tumor_PD1_2,project = "Tumor_PD1_2",min.cells = 3,min.features = 200)
+Tumor_PD1_2[["percent.mt"]] <- PercentageFeatureSet(Tumor_PD1_2,pattern = "^mt-")
+p1 <- VlnPlot(Tumor_PD1_2,features = c("nFeature_RNA","nCount_RNA","percent.mt"))
+ggsave("violinplot.pdf",plot = p1)
+Tumor_PD1_2 <- subset(Tumor_PD1_2,subset = nFeature_RNA > 200 & nFeature_RNA < 5000 & percent.mt < 8)
+Tumor_PD1_2 <- NormalizeData(Tumor_PD1_2,normalization.method = "LogNormalize",scale.factor = 10000)
+Tumor_PD1_3 <- Read10X(data.dir = "Mc38-PD1T3.UMITask.matrix/filtered_feature_bc_matrix")
+Tumor_PD1_3 <- CreateSeuratObject(counts = Tumor_PD1_3,project = "Tumor_PD1_3",min.cells = 3,min.features = 200)
+Tumor_PD1_3[["percent.mt"]] <- PercentageFeatureSet(Tumor_PD1_3,pattern = "^mt-")
+p1 <- VlnPlot(Tumor_PD1_3,features = c("nFeature_RNA","nCount_RNA","percent.mt"))
+ggsave("violinplot.pdf",plot = p1)
+Tumor_PD1_3 <- subset(Tumor_PD1_3,subset = nFeature_RNA > 200 & nFeature_RNA < 5000 & percent.mt < 8)
+Tumor_PD1_3 <- NormalizeData(Tumor_PD1_3,normalization.method = "LogNormalize",scale.factor = 10000)
+Tumor_Ctrl1 <- RenameCells(Tumor_Ctrl1, add.cell.id = "Tumor_Ctrl1")
+Tumor_Ctrl2 <- RenameCells(Tumor_Ctrl2, add.cell.id = "Tumor_Ctrl2")
+Tumor_Ctrl3 <- RenameCells(Tumor_Ctrl3, add.cell.id = "Tumor_Ctrl3")
+Tumor_PD1_1 <- RenameCells(Tumor_PD1_1, add.cell.id = "Tumor_PD1_1")
+Tumor_PD1_2 <- RenameCells(Tumor_PD1_2, add.cell.id = "Tumor_PD1_2")
+Tumor_PD1_3 <- RenameCells(Tumor_PD1_3, add.cell.id = "Tumor_PD1_3")
+scRNAlist <- list(Tumor_Ctrl1,Tumor_Ctrl2,Tumor_Ctrl3,Tumor_PD1_1,Tumor_PD1_2,Tumor_PD1_3)
+samples_name = c('Tumor_Ctrl1', 'Tumor_Ctrl2','Tumor_Ctrl3','Tumor_PD1_1','Tumor_PD1_2','Tumor_PD1_3')
+names(scRNAlist) <- samples_name
+scRNA <- merge(scRNAlist[[1]],scRNAlist[2:length(scRNAlist)])
+table(scRNA$orig.ident)
+saveRDS(scRNA, file = "Tumor_6sample_QC_merge.rds")
+scRNA.list <- SplitObject(scRNA, split.by = 'orig.ident')
+common_genes <- Reduce(intersect, lapply(scRNA.list, rownames))
+for(i in 1:length(scRNA.list)) {
+  scRNA.list[[i]] <- subset(scRNA.list[[i]], features = common_genes)
+}
+scRNA.list <- lapply(scRNA.list, FUN = function(x) NormalizeData(x))
+scRNA.list <- lapply(scRNA.list, FUN = function(x) FindVariableFeatures(x))
+scRNA.list <- lapply(scRNA.list, FUN = function(x) ScaleData(x))
+scRNA<- RunFastMNN(object.list = scRNA.list)
+scRNA<- FindNeighbors(scRNA, reduction = 'mnn',dims = 1:50)
+scRNA<- FindClusters(scRNA, resolution = 0.5)
+scRNA<- RunUMAP(scRNA, reduction = 'mnn', dims = 1:50)
+p1 <- DimPlot(scRNA, label = T, reduction = 'umap')
+ggsave("Tumor 6sample MNN cluster UMAP.pdf",plot=p1,width = 12, height = 10.5)
+Marker.Dotplot<-DotPlot(scRNA,
+                        features = c("Epcam","Cdh1","Krt8",#Epithelial cell
+                                     "Pecam1","Ptprb","Cd34",#Endothelial cell
+                                     "Cd14","Cd68","C1qa","Itgax",#髓系 cell
+                                     "Cxcr2","S100a8","S100a9",
+                                     "Fcer1a","Gata2","Kit",#Mast cell
+                                     "Cd3e","Cd3d","Cd3g",#T cell
+                                     "Klrb1c","Klre1","Klra8","Gzma",#NK
+                                     "Ccr7","Ccl22","Mreg","Flt3",#DC
+                                     "Xbp1","Jchain","Igkc","Iglc2",
+                                     "Ms4a1","Cd79a","Cd79b","Cd19", #B cell
+                                     "Col1a2","Dcn","Col3a1","Bgn" #Fibroblast cell
+                        ),
+                        assay = 'RNA', #注意，差别在这儿
+                        cols = c('gray', 'red')) + coord_flip()+theme_bw()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.5))
+ggsave("Markerplot.pdf",plot = Marker.Dotplot)
+scRNA <- JoinLayers(scRNA)
+scRNA.markers <- FindMarkers(scRNA, ident.1="4",only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
+top50 <- scRNA.markers %>% top_n(n = 50, wt = avg_log2FC)
+scRNA.markers <- FindMarkers(scRNA, ident.1="9",only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
+top50 <- scRNA.markers %>% top_n(n = 50, wt = avg_log2FC)
+scRNA.markers <- FindMarkers(scRNA, ident.1="21",only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
+top50 <- scRNA.markers %>% top_n(n = 50, wt = avg_log2FC)
+scRNA <- subset(scRNA,ident=c("4","9","16","17","21","24"),invert=T)
+scRNA<- RunUMAP(scRNA, reduction = 'mnn', dims = 1:50)
+p1 <- DimPlot(scRNA, label = T, reduction = 'umap')
+ggsave("Tumor 6sample MNN cluster UMAP.pdf",plot=p1,width = 12, height = 10.5)
+new.cluster.ids <- c("Tumor","Tumor","Macrophage","Tumor","Monocyte",
+                     "Tumor","Monocyte","Macrophage","Fibroblast","NK-T",
+                     "NK-T","Macrophage","Neutrophil","NK-T",
+                     "DC","Fibroblast","Endothelial cell",
+                     "B cell","Fibroblast")
+names(new.cluster.ids) <- levels(scRNA)
+scRNA <- RenameIdents(scRNA, new.cluster.ids)
+scRNA$celltype <- Idents(scRNA)
+pal <- c("#1F77B4", "#FF7F0E", "#2CA02C", "#D62728", "#9467BD",
+         "#8C564B", "#E377C2", "#7F7F7F", "#BCBD22", "#17BEFC","#ACACC2")
+p1 <- DimPlot(scRNA, label = T, reduction = 'umap',cols=pal)
+ggsave("Tumor 6sample MNN cluster UMAP Rename.pdf",plot=p1,width = 12, height = 10.5)
+p1 <- DimPlot(scRNA, reduction = "umap", group.by = "orig.ident",split.by = "orig.ident",cols=pal,ncol=3)
+ggsave("Tumor 6sample MNN sample UMAP .pdf",plot=p1,width = 15.7, height = 10)
+p1 <- DotPlot(scRNA, features = c("Col1a2","Dcn","Col3a1","Bgn","Itgam","Il1a","Cd14","Cd68","C1qa","Itgax","Cd3e","Cd3d","Cd3g","Klrb1c","Klre1","Klra8","Gzma","Cxcr2","S100a8","S100a9","Ccr7","Ccl22","Mreg","Flt3","Pecam1","Ptprb","Cd34","Ms4a1","Cd79a","Cd79b","Cd19"),
+        assay = 'RNA', cols = c('white', 'red')) + coord_flip()+theme_bw()+theme(axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.5))
+ggsave(file="Tumor 6sample MNN DotPlot Rename.pdf",plot=p1,width = 6, height = 10)
+df <- table(scRNA$orig.ident,Idents(scRNA))
+write.table(df,file = 'Tumor_6sample_celltype_count.xls',sep='\t',quote = T,row.names = T)
+saveRDS(scRNA,file="Tumor_6sample_MNN_UMAP_Rename.rds")
+rm -r MC38皮下成瘤外周血PD1单细胞表面RNA/Mc38-PD1T3.UMITask.matrix
+library(Seurat)
+library(tidyverse)
+library(patchwork)
+library(batchelor)
+library(harmony)
+library(SeuratWrappers)
+rm(list=ls())
+setwd("MC38皮下成瘤外周血PD1单细胞表面RNA")
+Blood_Ctrl1 <- Read10X(data.dir = "Mc38-TumorB1.UMITask.matrix/filtered_feature_bc_matrix")
+Blood_Ctrl1 <- CreateSeuratObject(counts = Blood_Ctrl1,project = "Blood_Ctrl1",min.cells = 3,min.features = 200)
+Blood_Ctrl1[["percent.mt"]] <- PercentageFeatureSet(Blood_Ctrl1,pattern = "^mt-")
+p1 <- VlnPlot(Blood_Ctrl1,features = c("nFeature_RNA","nCount_RNA","percent.mt"))
+ggsave("violinplot.pdf",plot = p1)
+Blood_Ctrl1 <- subset(Blood_Ctrl1,subset = nFeature_RNA > 200 & nFeature_RNA < 2000 & percent.mt < 15)
+Blood_Ctrl1 <- NormalizeData(Blood_Ctrl1,normalization.method = "LogNormalize",scale.factor = 10000)
+Blood_Ctrl2 <- Read10X(data.dir = "Mc38-TumorB2.UMITask.matrix/filtered_feature_bc_matrix")
+Blood_Ctrl2 <- CreateSeuratObject(counts = Blood_Ctrl2,project = "Blood_Ctrl2",min.cells = 3,min.features = 200)
+Blood_Ctrl2[["percent.mt"]] <- PercentageFeatureSet(Blood_Ctrl2,pattern = "^mt-")
+p1 <- VlnPlot(Blood_Ctrl2,features = c("nFeature_RNA","nCount_RNA","percent.mt"))
+ggsave("violinplot.pdf",plot = p1)
+Blood_Ctrl2 <- subset(Blood_Ctrl2,subset = nFeature_RNA > 200 & nFeature_RNA < 2000 & percent.mt < 15)
+Blood_Ctrl2 <- NormalizeData(Blood_Ctrl2,normalization.method = "LogNormalize",scale.factor = 10000)
+Blood_Ctrl3 <- Read10X(data.dir = "Mc38-TumorB3.UMITask.matrix/filtered_feature_bc_matrix")
+Blood_Ctrl3 <- CreateSeuratObject(counts = Blood_Ctrl3,project = "Blood_Ctrl3",min.cells = 3,min.features = 200)
+Blood_Ctrl3[["percent.mt"]] <- PercentageFeatureSet(Blood_Ctrl3,pattern = "^mt-")
+p1 <- VlnPlot(Blood_Ctrl3,features = c("nFeature_RNA","nCount_RNA","percent.mt"))
+ggsave("violinplot.pdf",plot = p1)
+Blood_Ctrl3 <- subset(Blood_Ctrl3,subset = nFeature_RNA > 200 & nFeature_RNA < 2000 & percent.mt < 15)
+Blood_Ctrl3 <- NormalizeData(Blood_Ctrl3,normalization.method = "LogNormalize",scale.factor = 10000)
+Blood_PD1_1 <- Read10X(data.dir = "Mc38-PD1B1.UMITask.matrix/filtered_feature_bc_matrix")
+Blood_PD1_1 <- CreateSeuratObject(counts = Blood_PD1_1,project = "Blood_PD1_1",min.cells = 3,min.features = 200)
+Blood_PD1_1[["percent.mt"]] <- PercentageFeatureSet(Blood_PD1_1,pattern = "^mt-")
+p1 <- VlnPlot(Blood_PD1_1,features = c("nFeature_RNA","nCount_RNA","percent.mt"))
+ggsave("violinplot.pdf",plot = p1)
+Blood_PD1_1 <- subset(Blood_PD1_1,subset = nFeature_RNA > 200 & nFeature_RNA < 2000 & percent.mt < 15)
+Blood_PD1_1 <- NormalizeData(Blood_PD1_1,normalization.method = "LogNormalize",scale.factor = 10000)
+Blood_PD1_2 <- Read10X(data.dir = "Mc38-PD1B2.UMITask.matrix/filtered_feature_bc_matrix")
+Blood_PD1_2 <- CreateSeuratObject(counts = Blood_PD1_2,project = "Blood_PD1_2",min.cells = 3,min.features = 200)
+Blood_PD1_2[["percent.mt"]] <- PercentageFeatureSet(Blood_PD1_2,pattern = "^mt-")
+p1 <- VlnPlot(Blood_PD1_2,features = c("nFeature_RNA","nCount_RNA","percent.mt"))
+ggsave("violinplot.pdf",plot = p1)
+Blood_PD1_2 <- subset(Blood_PD1_2,subset = nFeature_RNA > 200 & nFeature_RNA < 2000 & percent.mt < 15)
+Blood_PD1_2 <- NormalizeData(Blood_PD1_2,normalization.method = "LogNormalize",scale.factor = 10000)
+Blood_PD1_3 <- Read10X(data.dir = "Mc38-PD1B3.UMITask.matrix/filtered_feature_bc_matrix")
+Blood_PD1_3 <- CreateSeuratObject(counts = Blood_PD1_3,project = "Blood_PD1_3",min.cells = 3,min.features = 200)
+Blood_PD1_3[["percent.mt"]] <- PercentageFeatureSet(Blood_PD1_3,pattern = "^mt-")
+p1 <- VlnPlot(Blood_PD1_3,features = c("nFeature_RNA","nCount_RNA","percent.mt"))
+ggsave("violinplot.pdf",plot = p1)
+Blood_PD1_3 <- subset(Blood_PD1_3,subset = nFeature_RNA > 200 & nFeature_RNA < 2000 & percent.mt < 15)
+Blood_PD1_3 <- NormalizeData(Blood_PD1_3,normalization.method = "LogNormalize",scale.factor = 10000)
+Blood_Ctrl1 <- RenameCells(Blood_Ctrl1, add.cell.id = "Blood_Ctrl1")
+Blood_Ctrl2 <- RenameCells(Blood_Ctrl2, add.cell.id = "Blood_Ctrl2")
+Blood_Ctrl3 <- RenameCells(Blood_Ctrl3, add.cell.id = "Blood_Ctrl3")
+Blood_PD1_1 <- RenameCells(Blood_PD1_1, add.cell.id = "Blood_PD1_1")
+Blood_PD1_2 <- RenameCells(Blood_PD1_2, add.cell.id = "Blood_PD1_2")
+Blood_PD1_3 <- RenameCells(Blood_PD1_3, add.cell.id = "Blood_PD1_3")
+scRNAlist <- list(Blood_Ctrl1,Blood_Ctrl2,Blood_Ctrl3,Blood_PD1_1,Blood_PD1_2,Blood_PD1_3)
+samples_name = c('Blood_Ctrl1', 'Blood_Ctrl2','Blood_Ctrl3','Blood_PD1_1','Blood_PD1_2','Blood_PD1_3')
+names(scRNAlist) <- samples_name
+scRNA <- merge(scRNAlist[[1]],scRNAlist[2:length(scRNAlist)])
+table(scRNA$orig.ident)
+saveRDS(scRNA, file = "Blood_6sample_QC_merge.rds")
+scRNA.list <- SplitObject(scRNA, split.by = 'orig.ident')
+common_genes <- Reduce(intersect, lapply(scRNA.list, rownames))
+for(i in 1:length(scRNA.list)) {
+  scRNA.list[[i]] <- subset(scRNA.list[[i]], features = common_genes)
+}
+scRNA.list <- lapply(scRNA.list, FUN = function(x) NormalizeData(x))
+scRNA.list <- lapply(scRNA.list, FUN = function(x) FindVariableFeatures(x))
+scRNA.list <- lapply(scRNA.list, FUN = function(x) ScaleData(x))
+scRNA<- RunFastMNN(object.list = scRNA.list)
+scRNA<- FindNeighbors(scRNA, reduction = 'mnn',dims = 1:50)
+scRNA<- FindClusters(scRNA, resolution = 0.5)
+scRNA<- RunUMAP(scRNA, reduction = 'mnn', dims = 1:50)
+p1 <- DimPlot(scRNA, label = T, reduction = 'umap')
+ggsave("Tumor 6sample MNN cluster UMAP.pdf",plot=p1,width = 12, height = 10.5)
+scRNA.list <- SplitObject(scRNA, split.by = 'orig.ident')
+common_genes <- Reduce(intersect, lapply(scRNA.list, rownames))
+for(i in 1:length(scRNA.list)) {
+  scRNA.list[[i]] <- subset(scRNA.list[[i]], features = common_genes)
+}
+scRNA.list <- lapply(scRNA.list, FUN = function(x) NormalizeData(x))
+scRNA.list <- lapply(scRNA.list, FUN = function(x) FindVariableFeatures(x))
+scRNA.list <- lapply(scRNA.list, FUN = function(x) ScaleData(x))
+scRNA<- RunFastMNN(object.list = scRNA.list)
+scRNA<- FindNeighbors(scRNA, reduction = 'mnn',dims = 1:50)
+scRNA<- FindClusters(scRNA, resolution = 0.5)
+scRNA<- RunUMAP(scRNA, reduction = 'mnn', dims = 1:50)
+p1 <- DimPlot(scRNA, label = T, reduction = 'umap')
+ggsave("Blood 6sample MNN cluster UMAP.pdf",plot=p1,width = 12, height = 10.5)
+Marker.Dotplot<-DotPlot(scRNA,
+                        features = c("Epcam","Cdh1","Krt8",#Epithelial cell
+                                     "Pecam1","Ptprb","Cd34",#Endothelial cell
+                                     "Cd14","Cd68","C1qa","Itgax",#髓系 cell
+                                     "Cxcr2","S100a8","S100a9",
+                                     "Fcer1a","Gata2","Kit",#Mast cell
+                                     "Cd3e","Cd3d","Cd3g",#T cell
+                                     "Klrb1c","Klre1","Klra8","Gzma",#NK
+                                     "Ccr7","Ccl22","Mreg","Flt3",#DC
+                                     "Xbp1","Jchain","Igkc","Iglc2",
+                                     "Ms4a1","Cd79a","Cd79b","Cd19", #B cell
+                                     "Col1a2","Dcn","Col3a1","Bgn" #Fibroblast cell
+                        ),
+                        assay = 'RNA', #注意，差别在这儿
+                        cols = c('gray', 'red')) + coord_flip()+theme_bw()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.5))
+ggsave("Markerplot.pdf",plot = Marker.Dotplot)
+scRNA <- JoinLayers(scRNA)
+scRNA.markers <- FindMarkers(scRNA, ident.1="4",only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
+top50 <- scRNA.markers %>% top_n(n = 50, wt = avg_log2FC)
+scRNA.markers <- FindMarkers(scRNA, ident.1="6",only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
+top50 <- scRNA.markers %>% top_n(n = 50, wt = avg_log2FC)
+scRNA.markers <- FindMarkers(scRNA, ident.1="12",only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
+top50 <- scRNA.markers %>% top_n(n = 50, wt = avg_log2FC)
+scRNA.markers <- FindMarkers(scRNA, ident.1="14",only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
+top50 <- scRNA.markers %>% top_n(n = 50, wt = avg_log2FC)
+scRNA.markers <- FindMarkers(scRNA, ident.1="15",only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
+top50 <- scRNA.markers %>% top_n(n = 50, wt = avg_log2FC)
+scRNA.markers <- FindMarkers(scRNA, ident.1="21",only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
+top50 <- scRNA.markers %>% top_n(n = 50, wt = avg_log2FC)
+scRNA.markers <- FindMarkers(scRNA, ident.1="22",only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
+top50 <- scRNA.markers %>% top_n(n = 50, wt = avg_log2FC)
+scRNA <- subset(scRNA,ident=c("11","15","21","24"),invert=T)
+scRNA<- RunUMAP(scRNA, reduction = 'mnn', dims = 1:50)
+p1 <- DimPlot(scRNA, label = T, reduction = 'umap')
+ggsave("Blood 6sample MNN cluster UMAP.pdf",plot=p1,width = 12, height = 10.5)
+new.cluster.ids <- c("B cell","Neutrophil","Neutrophil","NK-T","Monocyte",
+                     "NK-T","Monocyte","B cell","Neutrophil","NK-T",
+                     "B cell","Monocyte","Neutrophil","Monocyte",
+                     "Neutrophil","NK-T","B cell",
+                     "NK-T","Mast cell","Platelet","NK-T")
+names(new.cluster.ids) <- levels(scRNA)
+scRNA <- RenameIdents(scRNA, new.cluster.ids)
+scRNA$celltype <- Idents(scRNA)
+pal <- c("#1F77B4", "#FF7F0E", "#2CA02C", "#D62728", "#9467BD",
+         "#8C564B", "#E377C2", "#7F7F7F", "#BCBD22", "#17BEFC","#ACACC2")
+p1 <- DimPlot(scRNA, label = T, reduction = 'umap',cols=pal)
+ggsave("Blood 6sample MNN cluster UMAP Rename.pdf",plot=p1,width = 12, height = 10.5)
+p1 <- DimPlot(scRNA, reduction = "umap", group.by = "orig.ident",split.by = "orig.ident",cols=pal,ncol=3)
+ggsave("Blood 6sample MNN sample UMAP .pdf",plot=p1,width = 15.7, height = 10)
+p1 <- DotPlot(scRNA, features = c("Ms4a1","Cd79a","Cd79b","Cd19","Cxcr2","S100a8","S100a9","Cd3e","Cd3d","Cd3g","Klrb1c","Klre1","Klra8","Gzma","Cd68","Vcan","Csf1r","Fcn1","Gata2","Fcer1a","Ppbp","Itga2b","Gp5","Gp1bb"),
+        assay = 'RNA', cols = c('white', 'red')) + coord_flip()+theme_bw()+theme(axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.5))
+ggsave(file="Blood 6sample MNN DotPlot Rename.pdf",plot=p1,width = 6, height = 10)
+df <- table(scRNA$orig.ident,Idents(scRNA))
+write.table(df,file = 'Blood_6sample_celltype_count.xls',sep='\t',quote = T,row.names = T)
+saveRDS(scRNA,file="Blood_6sample_MNN_UMAP_Rename.rds")
+rm -r MC38皮下成瘤外周血PD1单细胞表面RNA/Mc38-PD1B1.UMITask.matrix
+
+scRNA <- readRDS("Tumor_6sample_MNN_UMAP_Rename.rds")
+scRNA <- subset(scRNA,ident="NK-T")
+scRNA.list <- SplitObject(scRNA, split.by = 'orig.ident')
+scRNA.list <- lapply(scRNA.list, FUN = function(x) NormalizeData(x))
+scRNA.list <- lapply(scRNA.list, FUN = function(x) FindVariableFeatures(x))
+scRNA.list <- lapply(scRNA.list, FUN = function(x) ScaleData(x))
+scRNA<- RunFastMNN(object.list = scRNA.list)
+scRNA<- FindNeighbors(scRNA, reduction = 'mnn',dims = 1:50)
+scRNA<- FindClusters(scRNA, resolution = 1.0)
+scRNA<- RunUMAP(scRNA, reduction = 'mnn', dims = 1:50)
+p1 <- DimPlot(scRNA, label = T)
+ggsave("T_cell/Tumor 6sample T MNN cluster UMAP.pdf",plot=p1,width=11.7,height=10)
+p1 <- DotPlot(scRNA, features = c("Cd3e","Cd3d","Cd3g","Cd4","Cd8a","Klrb1c","Klre1","Klra8","Gzma"),
+        assay = 'RNA', cols = c('gray', 'red')) + coord_flip()+theme_bw()+theme(axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.5))
+ggsave("T_cell/RPlot.pdf",plot=p1)
+scRNA <- subset(scRNA,ident=c("3","6","9"),invert=T)
+scRNA <- RunUMAP(scRNA,reduction = 'mnn',dims = 1:50)
+scRNA <- FindNeighbors(scRNA, reduction = 'mnn',dims=1:50) %>% FindClusters(resolution=1.0)
+p1 <- DimPlot(scRNA, label = T)
+ggsave("T_cell/Tumor 6sample T MNN cluster UMAP.pdf",plot=p1,width=11.7,height=10)
+p1 <- DotPlot(scRNA, features = c("Cd3e","Cd3d","Cd3g","Cd4","Cd8a","Klrb1c","Klre1","Klra8","Gzma"),
+        assay = 'RNA', cols = c('gray', 'red')) + coord_flip()+theme_bw()+theme(axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.5))
+ggsave("T_cell/RPlot.pdf",plot=p1)
+scRNA <- JoinLayers(scRNA)
+scRNA.markers <- FindAllMarkers(scRNA, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
+top50 <- scRNA.markers %>% group_by(cluster) %>% top_n(n = 50, wt = avg_log2FC)
+write.csv(top50,file = "T_cell/Tumor_6sample_T_MNN_top50markers.csv")
+scRNA <- subset(scRNA,ident=c("5","7"),invert=T)
+scRNA <- RunUMAP(scRNA,reduction = 'mnn',dims = 1:50)
+p1 <- DimPlot(scRNA, label = T)
+ggsave("T_cell/Tumor 6sample T MNN cluster UMAP.pdf",plot=p1,width=11.7,height=10)
+p1 <- DotPlot(scRNA, features = c("Cd3e","Cd3d","Cd3g","Cd4","Cd8a","Klrb1c","Klre1","Klra8","Gzma"),
+        assay = 'RNA', cols = c('gray', 'red')) + coord_flip()+theme_bw()+theme(axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.5))
+ggsave("T_cell/RPlot.pdf",plot=p1)
+p1 <- DotPlot(scRNA, features = c("Il6r","Btla","Bcl6","Il2","Il6","Il17a","Il1r1","Il1r2","Il4","Il4r","Il5","Il9","Il13","Il22"),
+        assay = 'RNA', cols = c('gray', 'red')) + coord_flip()+theme_bw()+theme(axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.5))
+ggsave("T_cell/RPlot2.pdf",plot=p1)
+saveRDS(scRNA,file="T_cell/Tumor_6sample_T_MNN_UMAP.rds")
+new.cluster.ids <- c("CTL","Treg","Tn","CD8+Tpro","Tex","Tnfsf8+Th","gdT","pro Treg")
+names(new.cluster.ids) <- levels(scRNA)
+scRNA <- RenameIdents(scRNA, new.cluster.ids)
+scRNA@meta.data$subtype <- Idents(scRNA)
+pal <- c("#1F77B4", "#FF7F0E", "#2CA02C", "#D62728", "#9467BD",
+         "#8C564B", "#E377C2", "#7F7F7F", "#BCBD22", "#17BEFC","#ACACC2")
+p1 <- DimPlot(scRNA, label = T, reduction = 'umap',cols=pal)
+ggsave("T_cell/Tumor 6sample T MNN cluster UMAP Rename.pdf",plot=p1,width = 11.7, height = 10)
+p1 <- DotPlot(scRNA, features = c("Cd3e","Cd3d","Cd3g","Cd4","Cd8a","Pdcd1","Havcr2","Foxp3","Il2ra","Ctla4","Tcf7","Sell","Lef1","Mki67","Top2a","Birc5","Gzmf","Prf1","Gzmb","Tnfsf8","Tnfsf11","Il1r2","Trdc","Trgc1","Trdv4"),
+        assay = 'RNA', cols = c('white', 'red')) + coord_flip()+theme_bw()+theme(axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.5))
+ggsave("T_cell/Tumor 6sample T MNN Dotplot Rename.pdf",plot=p1,width = 8, height = 12)
+p1 <- DimPlot(scRNA, reduction = "umap", group.by = "orig.ident",split.by = "orig.ident",cols=pal,ncol=3)
+ggsave("T_cell/Tumor 6sample T MNN sample UMAP .pdf",plot=p1,width = 15.7, height = 10)
+df <- table(scRNA$orig.ident,Idents(scRNA))
+write.table(df,file = 'T_cell/Tumor_6sample_T_subtype_count.xls',sep='\t',quote = T,row.names = T)
+saveRDS(scRNA,file="T_cell/Tumor_6sample_T_MNN_UMAP_Rename.rds")
+
+scRNA <- readRDS("Blood_6sample_MNN_UMAP_Rename.rds")
+scRNA <- subset(scRNA,ident="NK-T")
+scRNA[["cd3.per"]] <- PercentageFeatureSet(scRNA,features = c("Cd3d","Cd3e","Cd3g"))
+scRNA[["Hba.per"]] <- PercentageFeatureSet(scRNA,features = c("Hbb-bs","Hbb-bt","Hba-a1","Hba-a2"))
+p1 <- VlnPlot(scRNA,features = c("cd3.per"))
+ggsave("T_cell/cd3_Vlnplot.pdf",plot = p1)
+p1 <- VlnPlot(scRNA,features = c("Hba.per"))
+ggsave("T_cell/Hba_Vlnplot.pdf",plot = p1)
+scRNA <- subset(scRNA,subset = cd3.per > 0.005 & Hba.per < 1)
+scRNA <- NormalizeData(scRNA) %>% FindVariableFeatures(nfeatures = 2000) %>% ScaleData()
+scRNA <- RunPCA(scRNA, verbose = F, npcs = 100)
+scRNA <- RunHarmony(scRNA, group.by.vars = "orig.ident", max.iter.harmony = 20)
+p1 <- ElbowPlot(scRNA, ndims = 100)
+ggsave("T_cell/RPlot.pdf",plot=p1)
+scRNA <- FindNeighbors(scRNA, reduction = 'harmony', dims=1:80) %>% FindClusters(resolution=1.0)
+scRNA <- RunUMAP(scRNA, reduction = 'harmony', dims = 1:80)
+p1 <- DimPlot(scRNA, label = T)
+ggsave("T_cell/Blood 6sample T harmony cluster UMAP.pdf",plot=p1,width=11.7,height=10)
+p1 <- DotPlot(scRNA, features = c("Cd3e","Cd3d","Cd3g","Cd4","Cd8a","Klrb1c","Klre1","Klra8","Gzma"),
+        assay = 'RNA', cols = c('gray', 'red')) + coord_flip()+theme_bw()+theme(axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.5))
+ggsave("T_cell/RPlot.pdf",plot=p1)
+scRNA <- subset(scRNA,ident=c("10"),invert=T)
+p1 <- DimPlot(scRNA, label = T)
+ggsave("T_cell/Blood 6sample T harmony cluster UMAP.pdf",plot=p1,width=11.7,height=10)
+p1 <- DotPlot(scRNA, features = c("Cd3e","Cd3d","Cd3g","Cd4","Cd8a","Klrb1c","Klre1","Klra8","Gzma"),
+        assay = 'RNA', cols = c('gray', 'red')) + coord_flip()+theme_bw()+theme(axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.5))
+ggsave("T_cell/RPlot.pdf",plot=p1)
+scRNA.markers <- FindAllMarkers(scRNA, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
+top50 <- scRNA.markers %>% group_by(cluster) %>% top_n(n = 50, wt = avg_log2FC)
+write.csv(top50,file = "T_cell/Blood_6sample_T_harmony_top50markers.csv")
+scRNA <- subset(scRNA,ident=c("4","8","11"),invert=T)
+scRNA <- RunUMAP(scRNA,reduction = 'harmony',dims = 1:80)
+p1 <- DimPlot(scRNA, label = T)
+ggsave("T_cell/Blood 6sample T harmony cluster UMAP.pdf",plot=p1,width=11.7,height=10)
+p1 <- DotPlot(scRNA, features = c("Cd3e","Cd3d","Cd3g","Cd4","Cd8a","Lef1","Tcf7","Il7r","Sell"),
+        assay = 'RNA', cols = c('gray', 'red')) + coord_flip()+theme_bw()+theme(axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.5))
+ggsave("T_cell/RPlot.pdf",plot=p1)
+scRNA.markers <- FindAllMarkers(scRNA, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
+top50 <- scRNA.markers %>% group_by(cluster) %>% top_n(n = 50, wt = avg_log2FC)
+write.csv(top50,file = "T_cell/Blood_6sample_T_harmony_top50markers.csv")
+new.cluster.ids <- c("Tfh","Nkg7+Cd8T","Rps+Cd4T","Rps+Cd8T","Ccl5+Cd8T","Treg","gdT","CTL")
+names(new.cluster.ids) <- levels(scRNA)
+scRNA <- RenameIdents(scRNA, new.cluster.ids)
+scRNA@meta.data$subtype <- Idents(scRNA)
+pal <- c("#1F77B4", "#FF7F0E", "#2CA02C", "#D62728", "#9467BD",
+         "#8C564B", "#E377C2", "#7F7F7F", "#BCBD22", "#17BEFC","#ACACC2")
+p1 <- DimPlot(scRNA, label = T, reduction = 'umap',cols=pal)
+ggsave("T_cell/Blood 6sample T harmony cluster UMAP Rename.pdf",plot=p1,width = 11.7, height = 10)
+p1 <- DotPlot(scRNA, features = c("Cd3e","Cd3d","Cd3g","Cd4","Cd8a","Btla","Il6ra","Bach2","Nkg7","H2-Q6","Pde3b","Rps15a","Rps17","Rplp1","Ccl5","Il2rb","Ctla2a","Ikzf2","Foxp3","Ctla4","Trdc","Trgc1","Trgc2","Gzmb","Gzma","Cx3cr1"),
+        assay = 'RNA', cols = c('white', 'red')) + coord_flip()+theme_bw()+theme(axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.5))
+ggsave("T_cell/Blood 6sample T harmony Dotplot Rename.pdf",plot=p1,width = 8, height = 12)
+p1 <- DimPlot(scRNA, reduction = "umap", group.by = "orig.ident",split.by = "orig.ident",cols=pal,ncol=3)
+ggsave("T_cell/Blood 6sample T harmony sample UMAP .pdf",plot=p1,width = 15.7, height = 10)
+df <- table(scRNA$orig.ident,Idents(scRNA))
+write.table(df,file = 'T_cell/Blood_6sample_T_subtype_count.xls',sep='\t',quote = T,row.names = T)
+saveRDS(scRNA,file="T_cell/Blood_6sample_T_harmony_UMAP_Rename.rds")
+
+unzip MC38皮下成瘤外周血PD1单细胞表面RNA/csRNA_matrix_merge/Tumor_PD1_3.merged.zip -d MC38皮下成瘤外周血PD1单细胞表面RNA/csRNA_matrix_merge/Tumor_PD1_3_matrix_merged
+library(Seurat)
+library(harmony)
+library(tidyverse)
+library(patchwork)
+library(SeuratWrappers)
+rm(list=ls())#删除当前环境中的变量
+setwd("/cpfs01/projects-HDD/cfff-06c834685c9f_HDD/zdl_23210700088/MC38皮下成瘤外周血PD1单细胞表面RNA/csRNA_matrix_merge/T_cell")
+P3 <- Read10X(data.dir = "Tumor_PD1_3_matrix_merged")
+P3 <- CreateSeuratObject(counts = P3,project = "P3",min.cells = 3,min.features = 200)
+P3[["percent.mt"]] <- PercentageFeatureSet(P3,pattern = "^mt-")
+P3[["percent.csRNA"]] <- PercentageFeatureSet(P3,pattern = "^csRNA-")
+p1 <- VlnPlot(P3,features = c("nFeature_RNA","nCount_RNA","percent.mt","percent.csRNA"))
+ggsave("VlnPlot.pdf",plot=p1)
+P3 <- subset(P3,subset = nFeature_RNA > 200 & nFeature_RNA < 5000 & percent.mt < 8)
+C1 <- RenameCells(C1, add.cell.id = "C1")
+C2 <- RenameCells(C2, add.cell.id = "C2")
+C3 <- RenameCells(C3, add.cell.id = "C3")
+P1 <- RenameCells(P1, add.cell.id = "P1")
+P2 <- RenameCells(P2, add.cell.id = "P2")
+P3 <- RenameCells(P3, add.cell.id = "P3")
+scRNAlist <- list(C1,C2,C3,P1,P2,P3)
+samples_name = c('C1','C2','C3','P1','P2','P3')
+names(scRNAlist) <- samples_name
+scRNA <- merge(scRNAlist[[1]],scRNAlist[2:length(scRNAlist)])
+table(scRNA$orig.ident)
+saveRDS(scRNA, file = "Tumor_6sample_matrix_merge_QC.rds")
+scRNA.list <- SplitObject(scRNA, split.by = 'orig.ident')
+common_genes <- Reduce(intersect, lapply(scRNA.list, rownames))
+for(i in 1:length(scRNA.list)) {
+  scRNA.list[[i]] <- subset(scRNA.list[[i]], features = common_genes)
+}
+scRNA.list <- lapply(scRNA.list, FUN = function(x) NormalizeData(x))
+scRNA.list <- lapply(scRNA.list, FUN = function(x) FindVariableFeatures(x))
+scRNA.list <- lapply(scRNA.list, FUN = function(x) ScaleData(x))
+scRNA<- RunFastMNN(object.list = scRNA.list)
+scRNA<- FindNeighbors(scRNA, reduction = 'mnn',dims = 1:50)
+scRNA<- FindClusters(scRNA, resolution = 0.7)
+scRNA<- RunUMAP(scRNA, reduction = 'mnn', dims = 1:50)
+p1 <- DimPlot(scRNA, label = T, reduction = 'umap')
+ggsave("Tumor 6sample matrix merge MNN cluster UMAP.pdf",plot=p1,width = 12, height = 10.5)
+Marker.Dotplot<-DotPlot(scRNA,
+                        features = c("Epcam","Cdh1","Krt8",#Epithelial cell
+                                     "Pecam1","Ptprb","Cd34",#Endothelial cell
+                                     "Cd14","Cd68","C1qa","Itgax",#髓系 cell
+                                     "Cxcr2","S100a8","S100a9",
+                                     "Fcer1a","Gata2","Kit",#Mast cell
+                                     "Cd3e","Cd3d","Cd3g",#T cell
+                                     "Klrb1c","Klre1","Klra8","Gzma",#NK
+                                     "Ccr7","Ccl22","Mreg","Flt3",#DC
+                                     "Xbp1","Jchain","Igkc","Iglc2",
+                                     "Ms4a1","Cd79a","Cd79b","Cd19", #B cell
+                                     "Col1a2","Dcn","Col3a1","Bgn" #Fibroblast cell
+                        ),
+                        assay = 'RNA', #注意，差别在这儿
+                        cols = c('gray', 'red')) + coord_flip()+theme_bw()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.5))
+ggsave("Markerplot.pdf",plot = Marker.Dotplot)
+scRNA <- JoinLayers(scRNA)
+scRNA.markers <- FindMarkers(scRNA, ident.1="11",only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
+top50 <- scRNA.markers %>% top_n(n = 50, wt = avg_log2FC)
+scRNA.markers <- FindMarkers(scRNA, ident.1="16",only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
+top50 <- scRNA.markers %>% top_n(n = 50, wt = avg_log2FC)
+scRNA.markers <- FindMarkers(scRNA, ident.1="19",only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
+top50 <- scRNA.markers %>% top_n(n = 50, wt = avg_log2FC)
+scRNA <- subset(scRNA,ident=c("11","14","15","16","19"),invert=T)
+scRNA<- FindNeighbors(scRNA, reduction = 'mnn',dims = 1:50)
+scRNA<- FindClusters(scRNA, resolution = 0.7)
+scRNA<- RunUMAP(scRNA, reduction = 'mnn', dims = 1:50)
+p1 <- DimPlot(scRNA, label = T, reduction = 'umap')
+ggsave("Tumor 6sample matrix merge MNN cluster UMAP.pdf",plot=p1,width = 12, height = 10.5)
+new.cluster.ids <- c("Tumor","Tumor","Tumor","Macrophage","Monocyte","Monocyte","Tumor","Fibroblast","NK-T","Macrophage","Monocyte","NK-T","Macrophage","Neutrophil", "DC","Endothelial cell")
+names(new.cluster.ids) <- levels(scRNA)
+scRNA <- RenameIdents(scRNA, new.cluster.ids)
+scRNA$celltype <- Idents(scRNA)
+pal <- c("#1F77B4", "#FF7F0E", "#2CA02C", "#D62728", "#9467BD","#8C564B", "#E377C2", "#7F7F7F", "#BCBD22", "#17BEFC","#ACACC2")
+p1 <- DimPlot(scRNA, label = T, reduction = 'umap',cols=pal)
+ggsave("Tumor 6sample matrix merge MNN cluster UMAP Rename.pdf",plot=p1,width = 12, height = 10.5)
+p1 <- DimPlot(scRNA, reduction = "umap", group.by = "orig.ident",split.by = "orig.ident",cols=pal,ncol=3)
+ggsave("Tumor 6sample matrix merge MNN sample UMAP .pdf",plot=p1,width = 15.7, height = 10)
+p1 <- DotPlot(scRNA, features = c("Col1a2","Dcn","Col3a1","Bgn","Itgam","Il1a","Cd14","Cd68","C1qa","Itgax","Cd3e","Cd3d","Cd3g","Klrb1c","Klre1","Klra8","Gzma","Cxcr2","S100a8","S100a9","Ccr7","Ccl22","Mreg","Flt3","Pecam1","Ptprb","Cd34"),assay = 'RNA', cols = c('white', 'red')) + coord_flip()+theme_bw()+theme(axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.5))
+ggsave(file="Tumor 6sample matrix merge MNN DotPlot Rename.pdf",plot=p1,width = 6, height = 10)
+df <- table(scRNA$orig.ident,Idents(scRNA))
+write.table(df,file = 'Tumor_6sample_matrix_merge_celltype_count.xls',sep='\t',quote = T,row.names = T)
+saveRDS(scRNA,file="Tumor_6sample_matrix_merge_MNN_UMAP_Rename.rds")
+scRNA <- readRDS("Tumor_6sample_matrix_merge_MNN_UMAP_Rename.rds")
+scRNA <- subset(scRNA,ident="NK-T")
+scRNA.list <- SplitObject(scRNA, split.by = 'orig.ident')
+scRNA.list <- lapply(scRNA.list, FUN = function(x) NormalizeData(x))
+scRNA.list <- lapply(scRNA.list, FUN = function(x) FindVariableFeatures(x))
+scRNA.list <- lapply(scRNA.list, FUN = function(x) ScaleData(x))
+scRNA<- RunFastMNN(object.list = scRNA.list)
+scRNA<- FindNeighbors(scRNA, reduction = 'mnn',dims = 1:50)
+scRNA<- FindClusters(scRNA, resolution = 1.0)
+scRNA<- RunUMAP(scRNA, reduction = 'mnn', dims = 1:50)
+p1 <- DimPlot(scRNA, label = T)
+ggsave("T_cell/Tumor 6sample matrix merge T MNN cluster UMAP.pdf",plot=p1,width=11.7,height=10)
+p1 <- DotPlot(scRNA, features = c("Cd3e","Cd3d","Cd3g","Cd4","Cd8a","Klrb1c","Klre1","Klra8","Gzma"), assay = 'RNA', cols = c('gray', 'red')) + coord_flip()+theme_bw()+theme(axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.5))
+ggsave("T_cell/RPlot.pdf",plot=p1)
+scRNA <- subset(scRNA,ident=c("5","7","10"),invert=T)
+scRNA <- RunUMAP(scRNA,reduction = 'mnn',dims = 1:50)
+scRNA <- FindNeighbors(scRNA, reduction = 'mnn',dims=1:50) %>% FindClusters(resolution=1.0)
+p1 <- DimPlot(scRNA, label = T)
+ggsave("T_cell/Tumor 6sample matrix merge T MNN cluster UMAP.pdf",plot=p1,width=11.7,height=10)
+p1 <- DotPlot(scRNA, features = c("Cd3e","Cd3d","Cd3g","Cd4","Cd8a","Klrb1c","Klre1","Klra8","Gzma"), assay = 'RNA', cols = c('gray', 'red')) + coord_flip()+theme_bw()+theme(axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.5))
+ggsave("T_cell/RPlot.pdf",plot=p1)
+scRNA <- JoinLayers(scRNA)
+scRNA.markers <- FindAllMarkers(scRNA, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
+top50 <- scRNA.markers %>% group_by(cluster) %>% top_n(n = 50, wt = avg_log2FC)
+write.csv(top50,file = "T_cell/Tumor_6sample_matrix_merge_T_MNN_top50markers.csv")
+scRNA <- subset(scRNA,ident=c("10"),invert=T)
+saveRDS(scRNA,file="T_cell/Tumor_6sample_matrix_merge_T_MNN_UMAP.rds")
+new.cluster.ids <- c("Tex","Tn","CD8+Tpro","Treg","Tn","CTL","Th","Treg","gdT","proTreg")
+names(new.cluster.ids) <- levels(scRNA)
+scRNA <- RenameIdents(scRNA, new.cluster.ids)
+scRNA@meta.data$subtype <- Idents(scRNA)
+pal <- c("#1F77B4", "#FF7F0E", "#2CA02C", "#D62728", "#9467BD", "#8C564B", "#E377C2", "#7F7F7F", "#BCBD22", "#17BEFC","#ACACC2")
+p1 <- DimPlot(scRNA, label = T, reduction = 'umap',cols=pal)
+ggsave("T_cell/Tumor 6sample matrix merge T MNN cluster UMAP Rename.pdf",plot=p1,width = 11.7, height = 10)
+p1 <- DotPlot(scRNA, features = c("Cd3e","Cd3d","Cd3g","Cd4","Cd8a","Pdcd1","Havcr2","Lgals3","Tcf7","Sell","Lef1","Mki67","Top2a","Birc5","Foxp3","Il2ra","Ctla4","Gzmf","Prf1","Gzmb","Tnfsf8","Tnfsf11","Il1r2","Trdc","Trgc1","Trdv4"), assay = 'RNA', cols = c('white', 'red')) + coord_flip()+theme_bw()+theme(axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.5))
+ggsave("T_cell/Tumor 6sample matrix merge T MNN Dotplot Rename.pdf",plot=p1,width = 8, height = 12)
+p1 <- DimPlot(scRNA, reduction = "umap", group.by = "orig.ident",split.by = "orig.ident",cols=pal,ncol=3)
+ggsave("T_cell/Tumor 6sample matrix merge T MNN sample UMAP .pdf",plot=p1,width = 15.7, height = 10)
+df <- table(scRNA$orig.ident,Idents(scRNA))
+write.table(df,file = 'T_cell/Tumor_6sample_matrix_merge_T_subtype_count.xls',sep='\t',quote = T,row.names = T)
+saveRDS(scRNA,file="T_cell/Tumor_6sample_matrix_merge_T_MNN_UMAP_Rename.rds")
+Idents(scRNA) <- scRNA$orig.ident
+expr <- AverageExpression(scRNA, assays = "RNA", slot = "data")[[1]]
+write.csv(expr,file = "T_cell/T_gene_expr.csv")
+p1 <- DotPlot(scRNA, features = c("csRNA-Cage1","csRNA-Clasp1","csRNA-Leng8","csRNA-Cdc73","csRNA-Skp1","csRNA-Dap3","csRNA-Fyn","csRNA-Stk24","csRNA-Snapc3","csRNA-Rpl32","csRNA-Rbpj","csRNA-Mcu","csRNA-Usp6nl","csRNA-Setdb1","csRNA-Xlr5a","csRNA-Igf1r","csRNA-Traf3","csRNA-Cndp2"), assay = 'RNA', cols = c('white', 'red')) + coord_flip()+theme_bw()+theme(axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.5))
+ggsave("T_cell/Tumor 6sample matrix merge T MNN csRNA Dotplot Rename.pdf",plot=p1,width = 8, height = 12)
+
+library(Seurat)
+library(harmony)
+library(tidyverse)
+library(patchwork)
+library(SeuratWrappers)
+rm(list=ls())#删除当前环境中的变量
+setwd("/cpfs01/projects-HDD/cfff-06c834685c9f_HDD/zdl_23210700088/MC38皮下成瘤外周血PD1单细胞表面RNA/csRNA_matrix_merge/T_cell")
+scRNA <- readRDS("Tumor_6sample_matrix_merge_T_MNN_UMAP_Rename.rds")
+Treg <- subset(scRNA,ident="Treg")
+Idents(Treg) <- Treg$orig.ident
+expr <- AverageExpression(Treg, assays = "RNA", slot = "count")[[1]]
+write.csv(expr,file = "Treg_gene_expr.csv")
+p1 <- DotPlot(Tex, features = c("csRNA-Gm6088",	"csRNA-Ppcs",	"csRNA-Pcnx3",	"csRNA-Alyref2",	"csRNA-B930036N10Rik",	"csRNA-Limk2",	"csRNA-Ddx54",	"csRNA-Apc",	"csRNA-Ubb",	"csRNA-Gm5224",	"csRNA-Gm56890",	"csRNA-Prrc2c",	"csRNA-Igf1r",	"csRNA-Eri1",	"csRNA-Gm34853",	"csRNA-mt-Co1",	"csRNA-Gm16156",	"csRNA-Psmb10",	"csRNA-Gm42997",	"csRNA-Gm43524",	"csRNA-Ube2d-ps",	"csRNA-Srrm2",	"csRNA-Tmem80",	"csRNA-Gm12207",	"csRNA-Skp1",	"csRNA-Ndufs5-ps",	"csRNA-Zbtb20",	"csRNA-Tet2",	"csRNA-Zcchc8",	"csRNA-Tada3",	"csRNA-Tarbp1",	"csRNA-Pim2"), assay = 'RNA', cols = c('white', 'red')) + coord_flip()+theme_bw()+theme(axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.5))
+ggsave("Tumor 6sample matrix merge Tex MNN csRNA Dotplot Rename.pdf",plot=p1,width = 8, height = 12)
+p1 <- DotPlot(CTL, features = c("csRNA-Nr4a3",	"csRNA-Col6a3",	"csRNA-Gm8518",	"csRNA-Ube2d-ps",	"csRNA-Slc25a44",	"csRNA-Ap1s1",	"csRNA-Gm57281",	"csRNA-Bod1",	"csRNA-Serbp1",	"csRNA-Casp3",	"csRNA-Fyn"), assay = 'RNA', cols = c('white', 'red')) + coord_flip()+theme_bw()+theme(axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.5))
+ggsave("Tumor 6sample matrix merge CTL MNN csRNA Dotplot Rename.pdf",plot=p1,width = 8, height = 12)
+p1 <- DotPlot(Treg, features = c("csRNA-Mbtd1",	"csRNA-Wdr36",	"csRNA-Xlr5a",	"csRNA-Traf3",	"csRNA-Ndufaf3",	"csRNA-1600012H06Rik",	"csRNA-Atxn7",	"csRNA-ENSMUSG00000129525",	"csRNA-Abhd2",	"csRNA-Igf1r",	"csRNA-ENSMUSG00000122810",	"csRNA-Ier5",	"csRNA-Mxd1",	"csRNA-Pml",	"csRNA-Zfand4",	"csRNA-Mfap3l",	"csRNA-Ppp1r12a"), assay = 'RNA', cols = c('white', 'red')) + coord_flip()+theme_bw()+theme(axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.5))
+ggsave("Tumor 6sample matrix merge Treg MNN csRNA Dotplot Rename.pdf",plot=p1,width = 8, height = 12)
+
+library(Seurat)
+library(harmony)
+library(tidyverse)
+library(patchwork)
+library(SeuratWrappers)
+rm(list=ls())#删除当前环境中的变量
+setwd("/cpfs01/projects-HDD/cfff-06c834685c9f_HDD/zdl_23210700088/MC38皮下成瘤外周血PD1单细胞表面RNA/csRNA_matrix_merge")
+scRNA <- readRDS("Tumor_6sample_matrix_merge_MNN_UMAP_Rename.rds")
+Tumor <- subset(scRNA,ident="Tumor")
+Idents(Tumor) <- Tumor$orig.ident
+expr <- AverageExpression(Tumor, assays = "RNA", slot = "count")[[1]]
+write.csv(expr,file = "Tumorcell/Tumor_gene_expr.csv")
+p1 <- DotPlot(Tumor, features = c("csRNA-Zfp36","csRNA-Tspan11",	"csRNA-Nfkbia",		"csRNA-Cox14",	"csRNA-Flrt2",	"csRNA-Srcap",	"csRNA-Trpm4",	"csRNA-Polr3c",	"csRNA-Snx9",	"csRNA-Casp3",	"csRNA-Nr4a3","csRNA-Setdb1",	"csRNA-Krt14",	"csRNA-Phf3"), assay = 'RNA', cols = c('white', 'red')) + coord_flip()+theme_bw()+theme(axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.5))
+ggsave("Tumorcell/Tumor 6sample matrix merge Tumor MNN csRNA Dotplot1 Rename.pdf",plot=p1,width = 8, height = 12)
+p1 <- DotPlot(Tumor, features = c("Zfp36","Tspan11",	"Nfkbia",		"Cox14",	"Flrt2",	"Srcap",	"Trpm4",	"Polr3c",	"Snx9",	"Casp3",	"Nr4a3","Setdb1",	"Krt14",	"Phf3"), assay = 'RNA', cols = c('white', 'red')) + coord_flip()+theme_bw()+theme(axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.5))
+ggsave("Tumorcell/Tumor 6sample matrix merge Tumor MNN csRNA Dotplot2 Rename.pdf",plot=p1,width = 8, height = 12)
+
+library(Seurat)
+library(harmony)
+library(tidyverse)
+library(patchwork)
+library(SeuratWrappers)
+rm(list=ls())#删除当前环境中的变量
+setwd("/cpfs01/projects-HDD/cfff-06c834685c9f_HDD/zdl_23210700088/MC38皮下成瘤外周血PD1单细胞表面RNA/csRNA_matrix_merge")
+scRNA <- readRDS("Tumor_6sample_matrix_merge_QC.rds")
+scRNA <- NormalizeData(scRNA) %>% FindVariableFeatures(nfeatures = 2000) %>% ScaleData()
+scRNA <- RunPCA(scRNA, verbose = F, npcs = 100)
+scRNA <- RunHarmony(scRNA, group.by.vars = "orig.ident", max.iter.harmony = 20)
+p1 <- ElbowPlot(scRNA, ndims = 100)
+ggsave("Elbowplot.pdf",plot = p1)
+scRNA <- FindNeighbors(scRNA, reduction = 'harmony', dims=1:100) %>% FindClusters(resolution=0.5)
+scRNA <- RunUMAP(scRNA, reduction = 'harmony', dims = 1:100)
+p1 <- DimPlot(scRNA, label = T, reduction = 'umap')
+ggsave("Tumor 6sample matrix merge harmony cluster UMAP.pdf.pdf",plot=p1,width = 12, height = 10.5)
+Marker.Dotplot<-DotPlot(scRNA, features = c("Epcam","Cdh1","Krt8",#Epithelial cell
+                                     "Pecam1","Ptprb","Cd34",#Endothelial cell
+                                     "Cd14","Cd68","C1qa","Itgax",#髓系 cell
+                                     "Cxcr2","S100a8","S100a9",
+                                     "Fcer1a","Gata2","Kit",#Mast cell
+                                     "Cd3e","Cd3d","Cd3g",#T cell
+                                     "Klrb1c","Klre1","Klra8","Gzma",#NK
+                                     "Ccr7","Ccl22","Mreg","Flt3",#DC
+                                     "Xbp1","Jchain","Igkc","Iglc2",
+                                     "Ms4a1","Cd79a","Cd79b","Cd19", #B cell
+                                     "Col1a2","Dcn","Col3a1","Bgn" #Fibroblast cell
+                        ),
+                        assay = 'RNA', #注意，差别在这儿
+                        cols = c('gray', 'red')) + coord_flip()+theme_bw()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.5))
+ggsave("Markerplot.pdf",plot = Marker.Dotplot)
+scRNA <- JoinLayers(scRNA)
+
+library(dplyr)
+library(Matrix)
+library(monocle)
+library(Seurat)
+library(patchwork)
+library(SeuratWrappers)
+rm(list = ls())
+setwd("MC38皮下成瘤外周血PD1单细胞表面RNA/csRNA_matrix_merge/T_cell")
+scRNA <- readRDS("Tumor_6sample_matrix_merge_T_MNN_UMAP_Rename.rds")
+Idents(scRNA) <- scRNA$orig.ident
+head(Idents(scRNA))
+new.cluster.ids <- c("Ctrl","Ctrl","Ctrl","PD-1","PD-1","PD-1")
+names(new.cluster.ids) <- levels(scRNA)
+scRNA <- RenameIdents(scRNA, new.cluster.ids)
+scRNA@meta.data$treat <- Idents(scRNA)
+Idents(scRNA) <- scRNA$subtype
+scRNA <- subset(scRNA,ident=c("Tn","CTL","Tex"))
+counts <- LayerData(scRNA,assay="RNA",layer="counts")
+scRNA[["RNA3"]] <- CreateAssayObject(counts=counts)
+data <- LayerData(scRNA,assay="RNA",layer="data")
+scRNA[["RNA3"]]@data <- data
+DefaultAssay(scRNA) <- "RNA3"
+scRNA[["RNA"]] <- NULL
+scRNA <- RenameAssays(scRNA,assay.name="RNA3",new.assay.name="RNA")
+seurat_object <- scRNA
+data <- as(as.matrix(seurat_object@assays$RNA@data), 'sparseMatrix')
+pd <- new('AnnotatedDataFrame', data = seurat_object@meta.data)
+fData <- data.frame(gene_short_name = row.names(data), row.names = row.names(data))
+fd <- new('AnnotatedDataFrame', data = fData)
+cds <- newCellDataSet(data,
+                      phenoData = pd,
+                      featureData = fd,
+                      lowerDetectionLimit = 1,
+                      expressionFamily = negbinomial.size());
+cds <- estimateSizeFactors(cds)
+cds <- estimateDispersions(cds)
+cds <- detectGenes(cds, min_expr = 3 )
+expressed_genes <- row.names(subset(fData(cds),
+                                    num_cells_expressed >= 10))
+diff_test_res <- differentialGeneTest(cds[expressed_genes,],
+                                      fullModelFormulaStr = "~ orig.ident")
+ordering_genes <- row.names (subset(diff_test_res, qval < 0.05)) 
+cds<- setOrderingFilter(cds, ordering_genes)
+cds <- reduceDimension(cds, 
+                           max_components = 2, 
+                           reduction_method = 'DDRTree')
+cds <- orderCells(cds)
+p1 <- plot_cell_trajectory(cds, color_by = "State")
+ggsave("Tumor 6Sample matrix merge Cd8T monocle state.pdf",plot=p1,width = 11.7, height = 10)
+p1 <- plot_cell_trajectory(cds, color_by = "Pseudotime",show_branch_points = FALSE)
+ggsave("Tumor 6Sample matrix merge Cd8T monocle pseudotime.pdf",plot=p1,width = 11.7, height = 10)
+p1 <- plot_cell_trajectory(cds, color_by = "subtype")
+ggsave("Tumor 6Sample matrix merge Cd8T monocle subtype.pdf",plot=p1,width = 11.7, height = 10)
+p1 <- plot_cell_trajectory(cds, color_by = "treat")+facet_wrap(~treat, ncol = 2)
+ggsave("Tumor 6Sample matrix merge Cd8T monocle sample.pdf",plot=p1,width = 10, height = 6)
+cds <- orderCells(cds,root_state = 6)
+saveRDS(cds,file="Tumor_6Sample_matrix_merge_Cd8T_monocle.rds")
+expressed_genes <- row.names(subset(fData(cds),
+                                    num_cells_expressed >= 50))
+gene_to_cluster <- expressed_genes[grepl("csRNA-", expressed_genes)]
+p1 <- plot_pseudotime_heatmap(cds[gene_to_cluster,],
+                        num_clusters = 3, 
+                        show_rownames = TRUE,
+                        cores = 1,return_heatmap = TRUE,
+                        hmcols = colorRampPalette(c("navy", "white", "firebrick3"))(100))
+ggsave("Tumor 6Sample matrix merge Cd8T monocle genepheatmap.pdf",plot=p1,width = 11.7, height = 10)
+p1 <- plot_genes_in_pseudotime(cds[gene_to_cluster,],
+                  color_by = "subtype",
+                  nrow= 6, 
+                  ncol = NULL )
+ggsave("Tumor 6Sample matrix merge Cd8T monocle genedotmap.pdf",plot=p1,width = 11.7, height = 10)
+pdf("Cd8T_monocle_csRNAgene/Tumor 6Sample matrix merge Cd8T monocle Zfp943.pdf", width = 10, height = 6)
+plot_cell_trajectory(cds,markers = c("csRNA-Zfp943"),use_color_gradient=T,color = "expression")+scale_color_gradient2(low = "gray", mid = "red", high = "black",midpoint = 0.5, space = "Lab", na.value = "grey50",guide = "colorbar", aesthetics = "color")+facet_wrap(~ treat, ncol = 2,scales = "free")
+dev.off()
+BEAM_res <- BEAM(cds,branch_point=2,cores=8,progenitor_method="duplicate")
+BEAM_res <- BEAM_res[order(BEAM_res$qval),]
+BEAM_res <- BEAM_res[,c("gene_short_name","pval","qval")]
+table(BEAM_res$pval < 0.05)
+BEAM_res2 <- BEAM_res[BEAM_res$pval < 0.05,]
+BEAM_res3 <- BEAM_res2[grepl("csRNA-", rownames(BEAM_res2)), ]
+pdf("Tumor 6Sample matrix merge Cd8T monocle branched genepheatmap.pdf",width = 11.7, height = 20)
+plot_genes_branched_heatmap(cds[rownames(BEAM_res3),], branch_point=2, num_clusters=4,cores=8, use_gene_short_name=T, show_rownames=T)
+dev.off()
+
+library(Seurat)
+library(harmony)
+library(tidyverse)
+library(patchwork)
+library(SeuratWrappers)
+rm(list=ls())#删除当前环境中的变量
+setwd("/cpfs01/projects-HDD/cfff-06c834685c9f_HDD/zdl_23210700088/MC38皮下成瘤外周血PD1单细胞表面RNA/csRNA_matrix_merge/T_cell")
+scRNA <- readRDS("Tumor_6sample_matrix_merge_T_MNN_UMAP_Rename.rds")
+Cd8T <- subset(scRNA,ident=c("Tn","CTL","Tex"))
+Idents(Cd8T) <- Cd8T$orig.ident
+p1 <- DotPlot(Cd8T, features = c("csRNA-Lgals3",	"csRNA-Gng10",	"csRNA-Srrm2","csRNA-Anxa7","csRNA-Cyfip1","csRNA-Foxd2os",	"csRNA-Pola1",	"csRNA-Tpm1","csRNA-Zfp943"), assay = 'RNA', cols = c('white', 'red')) + coord_flip()+theme_bw()+theme(axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.5))
+ggsave("Cd8T_monocle_csRNAgene/Tumor 6sample matrix merge Cd8T MNN csRNA Dotplot Rename.pdf",plot=p1,width = 8, height = 7)
+p1 <- DotPlot(Cd8T, features = c("Lgals3",	"Gng10",	"Srrm2","Anxa7","Cyfip1","Foxd2os","Pola1","Tpm1","Zfp943"), assay = 'RNA', cols = c('white', 'red')) + coord_flip()+theme_bw()+theme(axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.5))
+ggsave("Cd8T_monocle_csRNAgene/Tumor 6sample matrix merge Cd8T MNN intracellular csRNA Dotplot Rename.pdf",plot=p1,width = 8, height = 7)
+
+library(dplyr)
+library(Matrix)
+library(monocle)
+library(Seurat)
+library(patchwork)
+library(SeuratWrappers)
+rm(list = ls())
+setwd("MC38皮下成瘤外周血PD1单细胞表面RNA/csRNA_matrix_merge/T_cell")
+scRNA <- readRDS("Tumor_6sample_matrix_merge_T_MNN_UMAP_Rename.rds")
+scRNA <- subset(scRNA,ident=c("Tn","Treg","proTreg","Th"))
+counts <- LayerData(scRNA,assay="RNA",layer="counts")
+scRNA[["RNA3"]] <- CreateAssayObject(counts=counts)
+data <- LayerData(scRNA,assay="RNA",layer="data")
+scRNA[["RNA3"]]@data <- data
+DefaultAssay(scRNA) <- "RNA3"
+scRNA[["RNA"]] <- NULL
+scRNA <- RenameAssays(scRNA,assay.name="RNA3",new.assay.name="RNA")
+seurat_object <- scRNA
+data <- as(as.matrix(seurat_object@assays$RNA@data), 'sparseMatrix')
+pd <- new('AnnotatedDataFrame', data = seurat_object@meta.data)
+fData <- data.frame(gene_short_name = row.names(data), row.names = row.names(data))
+fd <- new('AnnotatedDataFrame', data = fData)
+cds <- newCellDataSet(data,
+                      phenoData = pd,
+                      featureData = fd,
+                      lowerDetectionLimit = 1,
+                      expressionFamily = negbinomial.size());
+cds <- estimateSizeFactors(cds)
+cds <- estimateDispersions(cds)
+cds <- detectGenes(cds, min_expr = 3 )
+expressed_genes <- row.names(subset(fData(cds),
+                                    num_cells_expressed >= 10))
+diff_test_res <- differentialGeneTest(cds[expressed_genes,],
+                                      fullModelFormulaStr = "~ seurat_clusters")
+ordering_genes <- row.names (subset(diff_test_res, qval < 0.01)) 
+cds<- setOrderingFilter(cds, ordering_genes)
+cds <- reduceDimension(cds, 
+                           max_components = 2, 
+                           reduction_method = 'DDRTree')
+cds <- orderCells(cds)
+p1 <- plot_cell_trajectory(cds, color_by = "State")
+ggsave("Tumor 6Sample matrix merge Cd4T monocle state.pdf",plot=p1,width = 11.7, height = 10)
+p1 <- plot_cell_trajectory(cds, color_by = "Pseudotime",show_branch_points = FALSE)
+ggsave("Tumor 6Sample matrix merge Cd4T monocle pseudotime.pdf",plot=p1,width = 11.7, height = 10)
+p1 <- plot_cell_trajectory(cds, color_by = "subtype")
+ggsave("Tumor 6Sample matrix merge Cd4T monocle subtype.pdf",plot=p1,width = 11.7, height = 10)
+p1 <- plot_cell_trajectory(cds, color_by = "orig.ident")+facet_wrap(~orig.ident, ncol = 3)
+ggsave("Tumor 6Sample matrix merge Cd4T monocle sample.pdf",plot=p1,width = 15, height = 12)
+saveRDS(cds,file="Tumor_6Sample_matrix_merge_Cd4T_monocle.rds")
+expressed_genes <- row.names(subset(fData(cds),
+                                    num_cells_expressed >= 50))
+gene_to_cluster <- expressed_genes[grepl("csRNA-", expressed_genes)]
+p1 <- plot_pseudotime_heatmap(cds[gene_to_cluster,],
+                        num_clusters = 2, 
+                        show_rownames = TRUE,
+                        cores = 1,return_heatmap = TRUE,
+                        hmcols = colorRampPalette(c("navy", "white", "firebrick3"))(100))
+ggsave("Tumor 6Sample matrix merge Cd4T monocle genepheatmap.pdf",plot=p1,width = 11.7, height = 10)
+pdf("Tumor 6Sample matrix merge Cd4T monocle csRNAgene.pdf", width = 10, height = 11)
+plot_cell_trajectory(cds,markers = c("csRNA-Cd81","csRNA-Ccdc184","csRNA-Hnrnp11","csRNA-Vmp1","csRNA-Ide"),use_color_gradient=T)+scale_color_gradient2(low = "gray", mid = "red", high = "black",midpoint = 0.5, space = "Lab", na.value = "grey50",guide = "colorbar", aesthetics = "color")
+dev.off()
