@@ -1,0 +1,388 @@
+--Linux terminal:
+
+##Quality control and genome alignment
+gunzip input.fq.gz
+seqtk sample -s100 input.fq 10000 > output.fq
+cutadapt -g CTATCTACGCTAGCCTCCAG -O 10 -o output.fq input.fq
+cutadapt -g GTGGAGTCGTGATTATA -O 17 -o output.fq input.fq
+cutadapt -a TATAATCACGACTCCAC -O 10 -o output.fq input.fq
+seqtk seq -L 20 input.fq > output.fq
+seqkit stat input.fq
+awk '{
+    if(NR%4==1) 
+        $0=substr($0,1,37) 
+    print
+}' input.fq > output.fq
+head -n 40 input.fq
+seqkit fx2tab input.fq | \
+awk '{print $1 "_" $2 "\t"  $2 "\t" $3}' | \
+seqkit tab2fx -o output.fq
+head -n 40 input.fq
+seqkit rmdup -n input.fq -o output.fq
+seqkit stat input.fq
+head -n 40 input.fq
+awk '{
+    if(NR%4==1) 
+        $0=substr($0,1,37) 
+    print
+}' input.fq > output.fq
+seqkit stat input.fq
+head -n 40 input.fq
+bowtie2 -p8 -x input_index  -U input.fq | samtools view -bS > output.bam
+
+--Linux terminal:
+
+##Transcriptome alignment
+cp /path/Blood_Ctrl_2_QC.fq
+seqkit stats Blood_PD1_3_QC.fq
+cat gencode.vM37.transcripts.fa mmu_mirna.fa mmu_other.fa > total_mmu_transcripts.fasta
+salmon index -t total_mmu_transcripts.fasta -i total_mm39 -k 31
+salmon quant -i total_mm39 -l A -r Blood_PD1_3_QC.fq -o Blood_PD1_3_dir
+awk '$5 != 0' Blood_PD1_3_dir/quant.sf > Blood_PD1_3_dir/quant_filtered.sf
+awk '{
+    if(NR%4==1) 
+        $0=substr($0,1,28) 
+    print
+}' Blood_PD1_3_QC.fq > Blood_PD1_3_cellbarcode.fastq
+
+
+--R:
+
+library(Seurat)
+library(pheatmap)
+library(ShortRead)
+rm(list=ls())
+setwd("/path")
+scRNA <- readRDS("Blood_6sample_MNN_UMAP_Rename.rds")
+Idents(scRNA) <- scRNA$orig.ident
+scRNA <- subset(scRNA,ident="Blood_Ctrl2")
+Idents(scRNA) <- scRNA$celltype
+reads <- readFastq("Blood_Ctrl_2_cellbarcode.fastq")
+Neu <- subset(scRNA,ident="Neutrophil")
+target_ids <- substr(colnames(Neu) ,13,39)
+selected <- reads[id(reads) %in% target_ids]
+writeFastq(selected, "Neu/Blood_Ctrl_2_Neu_csRNA.fastq", compress=FALSE)
+Tcell <- subset(scRNA,ident="NK-T")
+target_ids <- substr(colnames(Tcell) ,13,39)
+selected <- reads[id(reads) %in% target_ids]
+writeFastq(selected, "T_cell/Blood_Ctrl_2_NK-T_csRNA.fastq", compress=FALSE)
+Bcell <- subset(scRNA,ident="B cell")
+target_ids <- substr(colnames(Bcell) ,13,39)
+selected <- reads[id(reads) %in% target_ids]
+writeFastq(selected, "B_cell/Blood_Ctrl_2_B_csRNA.fastq", compress=FALSE)
+
+scRNA <- readRDS("Blood_6sample_MNN_UMAP_Rename.rds")
+Idents(scRNA) <- scRNA$orig.ident
+scRNA <- subset(scRNA,ident="Blood_PD1_3")
+Idents(scRNA) <- scRNA$celltype
+reads <- readFastq("Blood_PD1_3_cellbarcode.fastq")
+Neu <- subset(scRNA,ident="Neutrophil")
+target_ids <- substr(colnames(Neu) ,13,39)
+selected <- reads[id(reads) %in% target_ids]
+writeFastq(selected, "Neu/Blood_PD1_3_Neu_csRNA.fastq", compress=FALSE)
+Tcell <- subset(scRNA,ident="NK-T")
+target_ids <- substr(colnames(Tcell) ,13,39)
+selected <- reads[id(reads) %in% target_ids]
+writeFastq(selected, "T_cell/Blood_PD1_3_NK-T_csRNA.fastq", compress=FALSE)
+Bcell <- subset(scRNA,ident="B cell")
+target_ids <- substr(colnames(Bcell) ,13,39)
+selected <- reads[id(reads) %in% target_ids]
+writeFastq(selected, "B_cell/Blood_PD1_3_B_csRNA.fastq", compress=FALSE)
+
+scRNA <- readRDS("Tumor_6sample_MNN_UMAP_Rename.rds")
+Idents(scRNA) <- scRNA$orig.ident
+scRNA <- subset(scRNA,ident="Tumor_Ctrl3")
+Idents(scRNA) <- scRNA$celltype
+reads <- readFastq("Tumor_Ctrl_3_cellbarcode.fastq")
+Neu <- subset(scRNA,ident="Neutrophil")
+target_ids <- substr(colnames(Neu) ,13,39)
+selected <- reads[id(reads) %in% target_ids]
+writeFastq(selected, "Neu/Tumor_Ctrl_3_Neu_csRNA.fastq", compress=FALSE)
+Tcell <- subset(scRNA,ident="NK-T")
+target_ids <- substr(colnames(Tcell) ,13,39)
+selected <- reads[id(reads) %in% target_ids]
+writeFastq(selected, "T_cell/Tumor_Ctrl_3_NK-T_csRNA.fastq", compress=FALSE)
+Bcell <- subset(scRNA,ident="B cell")
+target_ids <- substr(colnames(Bcell) ,13,39)
+selected <- reads[id(reads) %in% target_ids]
+writeFastq(selected, "B_cell/Tumor_Ctrl_3_B_csRNA.fastq", compress=FALSE)
+
+scRNA <- readRDS("Tumor_6sample_MNN_UMAP_Rename.rds")
+Idents(scRNA) <- scRNA$orig.ident
+scRNA <- subset(scRNA,ident="Tumor_PD1_3")
+Idents(scRNA) <- scRNA$celltype
+reads <- readFastq("Tumor_PD1_3_cellbarcode.fastq")
+Neu <- subset(scRNA,ident="Neutrophil")
+target_ids <- substr(colnames(Neu) ,13,39)
+selected <- reads[id(reads) %in% target_ids]
+writeFastq(selected, "Neu/Tumor_PD1_3_Neu_csRNA.fastq", compress=FALSE)
+Tcell <- subset(scRNA,ident="NK-T")
+target_ids <- substr(colnames(Tcell) ,13,39)
+selected <- reads[id(reads) %in% target_ids]
+writeFastq(selected, "T_cell/Tumor_PD1_3_NK-T_csRNA.fastq", compress=FALSE)
+Bcell <- subset(scRNA,ident="B cell")
+target_ids <- substr(colnames(Bcell) ,13,39)
+selected <- reads[id(reads) %in% target_ids]
+writeFastq(selected, "B_cell/Tumor_PD1_3_B_csRNA.fastq", compress=FALSE)
+
+
+--Linux terminal:
+##Transcriptome alignment
+
+salmon quant -i total_mm39 -l A -r /T_cell/Blood_Ctrl_1_NK-T_csRNA.fastq -o /T_cell/annotation/Blood_Ctrl_1_NK-T_dir
+awk '$5 != 0' /T_cell/annotation/Blood_Ctrl_1_NK-T_dir/quant.sf > /T_cell/annotation/Blood_Ctrl_1_NK-T_dir/quant_filtered.sf
+salmon quant -i total_mm39 -l A -r /Neu/Blood_Ctrl_1_Neu_csRNA.fastq -o /Neu/annotation/Blood_Ctrl_1_Neu_dir
+awk '$5 != 0' /Neu/annotation/Blood_Ctrl_1_Neu_dir/quant.sf > /Neu/annotation/Blood_Ctrl_1_Neu_dir/quant_filtered.sf
+salmon quant -i total_mm39 -l A -r /B_cell/Blood_Ctrl_1_B_csRNA.fastq -o /B_cell/annotation/Blood_Ctrl_1_B_dir
+awk '$5 != 0' /B_cell/annotation/Blood_Ctrl_1_B_dir/quant.sf > /B_cell/annotation/Blood_Ctrl_1_B_dir/quant_filtered.sf
+
+cd /path
+cat Tumor_Ctrl_1_QC.fq Tumor_Ctrl_2_QC.fq Tumor_Ctrl_3_QC.fq > Tumor_Ctrl_QC.fq
+grep '^@' Tumor_Ctrl_QC.fq > Tumor_Ctrl_sequence_names.txt
+awk '{print substr($0,2,27)}' Tumor_Ctrl_sequence_names.txt > Tumor_Ctrl_cellbarcodes.txt
+
+--R:
+
+library(Seurat)
+library(tidyverse)
+library(patchwork)
+rm(list=ls())
+setwd("/path")
+lines <- readLines("Tumor_Ctrl_cellbarcodes.txt")
+scRNA <- readRDS("Tumor_6sample_MNN_UMAP_Rename.rds")
+Idents(scRNA) <- scRNA$orig.ident
+scRNA <- subset(scRNA,ident=c("Tumor_Ctrl1","Tumor_Ctrl2","Tumor_Ctrl3"))
+freq <- table(lines)
+scRNA$csRNA <- freq[substr(colnames(scRNA) ,13,39)] 
+scRNA$csRNA[is.na(scRNA$csRNA)] <- 0
+library(ggpubr)
+plot_data <- FetchData(scRNA, vars = c("csRNA", "celltype"))
+p1 <- ggviolin(plot_data, "celltype", "csRNA", fill = "celltype", palette = ggsci::pal_npg("nrc")(10),scale="width", add = "boxplot",width=0.8,trim=T) + ylim(1, 4000)
+ggsave("Tumor Ctrl csRNA VlnPlot.pdf",plot=p1,width = 7, height = 7)
+
+--Linux terminal:
+
+cd /path
+cat Tumor_PD1_1_NK-T_csRNA.fastq Tumor_PD1_2_NK-T_csRNA.fastq Tumor_PD1_3_NK-T_csRNA.fastq > Tumor_PD1_NK-T_csRNA.fastq
+grep '^@' Tumor_PD1_NK-T_csRNA.fastq > Tumor_PD1_NK-T_names.txt
+awk '{print substr($0,2,27)}' Tumor_PD1_NK-T_names.txt > Tumor_PD1_NK-T_cellbarcodes.txt
+
+--R:
+
+library(Seurat)
+library(tidyverse)
+library(patchwork)
+rm(list=ls())
+setwd("/path")
+lines <- readLines("Tumor_PD1_NK-T_cellbarcodes.txt")
+scRNA <- readRDS("Tumor_6sample_T_MNN_UMAP_Rename.rds")
+Idents(scRNA) <- scRNA$orig.ident
+scRNA <- subset(scRNA,ident=c("Tumor_PD1_1","Tumor_PD1_2","Tumor_PD1_3"))
+freq <- table(lines)
+scRNA$csRNA <- freq[substr(colnames(scRNA) ,13,39)] 
+scRNA$csRNA[is.na(scRNA$csRNA)] <- 0
+library(ggpubr)
+plot_data <- FetchData(scRNA, vars = c("csRNA", "subtype"))
+p1 <- ggviolin(plot_data, "subtype", "csRNA", fill = "subtype", palette = ggsci::pal_npg("nrc")(10),scale="width", add = "boxplot",width=0.8,trim=T) + ylim(1, 2000)
+ggsave("Tumor PD1 T csRNA VlnPlot.pdf",plot=p1,width = 7, height = 7)
+
+library(Seurat)
+library(pheatmap)
+library(ShortRead)
+rm(list=ls())
+setwd("/path")
+scRNA <- readRDS("Tumor_6sample_T_MNN_UMAP_Rename.rds")
+Idents(scRNA) <- scRNA$orig.ident
+scRNA <- subset(scRNA,ident=c("Tumor_PD1_1","Tumor_PD1_2","Tumor_PD1_3"))
+Idents(scRNA) <- scRNA$subtype
+reads <- readFastq("Tumor_PD1_NK-T_csRNA.fastq")
+CTL <- subset(scRNA,ident="CTL")
+target_ids <- substr(colnames(CTL) ,13,39)
+selected <- reads[id(reads) %in% target_ids]
+writeFastq(selected, "T_subtype/Tumor_PD1_CTL_csRNA.fastq", compress=FALSE)
+
+--Linux terminal:
+
+cd /path
+salmon quant -i total_mm39 -l A -r Tumor_Ctrl_CTL_csRNA.fastq -o Tumor_Ctrl_CTL_dir
+awk '$5 != 0' Tumor_Ctrl_CTL_dir/quant.sf > Tumor_Ctrl_CTL_dir/quant_filtered.sf
+
+
+--R:
+setwd("/path")
+Cd8Tpro <- read.table("Cd8Tpro.csv",header = T,sep = ",")
+CTL <- read.table("CTL.csv",header = T,sep = ",")
+gdT <- read.table("gdT.csv",header = T,sep = ",")
+proTreg <- read.table("proTreg.csv",header = T,sep = ",")
+Tex <- read.table("Tex.csv",header = T,sep = ",")
+Tn <- read.table("Tn.csv",header = T,sep = ",")
+Tnfsf8Th <- read.table("Tnfsf8Th.csv",header = T,sep = ",")
+Treg <- read.table("Treg.csv",header = T,sep = ",")
+result_merge <- merge(Cd8Tpro,CTL, by = "gene",all = T)
+result_merge <- merge(result_merge,gdT, by = "gene",all = T)
+result_merge <- merge(result_merge,proTreg, by = "gene",all = T)
+result_merge <- merge(result_merge,Tex, by = "gene",all = T)
+result_merge <- merge(result_merge,Tn, by = "gene",all = T)
+result_merge <- merge(result_merge,Tnfsf8Th, by = "gene",all = T)
+result_merge <- merge(result_merge,Treg, by = "gene",all = T)
+result_merge[is.na(result_merge)] <- 0
+write.csv(result_merge,file = "T_expr.csv",row.names = F)
+library(dplyr)
+library(pheatmap)
+rownames(result_merge) <- result_merge$gene
+result_merge <- result_merge[,2:9]
+p1 <- pheatmap(result_merge,show_colnames = T,show_rownames = T,
+               scale = "row",
+               cluster_cols = F,
+               breaks = seq(-2,2,length.out=100), 
+               color = colorRampPalette(c("#2166ac", "#67a9cf", "white", "#ef8a62", "#b2182b"))(100))
+
+library(Seurat)
+library(pheatmap)
+library(ShortRead)
+rm(list=ls())
+setwd("/path")
+scRNA <- readRDS("Tumor_6sample_T_MNN_UMAP_Rename.rds")
+Idents(scRNA) <- scRNA$orig.ident
+scRNA <- subset(scRNA,ident=c("Tumor_PD1_3"))
+Idents(scRNA) <- scRNA$subtype
+reads <- readFastq("Tumor_PD1_3_NK-T_csRNA.fastq")
+proTreg <- subset(scRNA,ident="pro Treg")
+target_ids <- substr(colnames(proTreg) ,13,39)
+selected <- reads[id(reads) %in% target_ids]
+writeFastq(selected, "Tumor_PD1_3_proTreg_csRNA.fastq", compress=FALSE)
+
+--Linux terminal:
+cd /path
+salmon quant -i total_mm39 -l A -r Tumor_Ctrl_1_proTreg_csRNA.fastq -o Tumor_Ctrl_1_proTreg_dir
+awk '$5 != 0' Tumor_Ctrl_1_proTreg_dir/quant.sf > Tumor_Ctrl_1_proTreg_dir/quant_filtered.sf
+
+--R
+setwd("/path")
+T_C_1_CTL <- read.table("T_C_1_CTL.csv",header = T,sep = ",")
+T_C_2_CTL <- read.table("T_C_2_CTL.csv",header = T,sep = ",")
+T_C_3_CTL <- read.table("T_C_3_CTL.csv",header = T,sep = ",")
+T_P_1_CTL <- read.table("T_P_1_CTL.csv",header = T,sep = ",")
+T_P_2_CTL <- read.table("T_P_2_CTL.csv",header = T,sep = ",")
+T_P_3_CTL <- read.table("T_P_3_CTL.csv",header = T,sep = ",")
+result_merge <- merge(T_C_1_CTL,T_C_2_CTL, by = "gene",all = T)
+result_merge <- merge(result_merge,T_C_3_CTL, by = "gene",all = T)
+result_merge <- merge(result_merge,T_P_1_CTL, by = "gene",all = T)
+result_merge <- merge(result_merge,T_P_2_CTL, by = "gene",all = T)
+result_merge <- merge(result_merge,T_P_3_CTL, by = "gene",all = T)
+result_merge[is.na(result_merge)] <- 0
+rownames(result_merge) <- result_merge$gene
+result_merge <- result_merge[,2:7]
+result_merge <- result_merge[rowSums(result_merge) > 6,]
+write.csv(result_merge,file = "Tumor_CTL_mRNA_expr.csv",row.names = T)
+diffcount <- result_merge
+sampleTable <- data.frame(condition = factor(rep(c("ctrl","treatment"),each=3)))
+library(DESeq2)
+dds <- DESeqDataSetFromMatrix(countData = round(diffcount),colData = sampleTable,design = ~condition)
+dds <- DESeq(dds)
+res <- results(dds)
+diff_res <- as.data.frame(res)
+diff_res$gene_id <- rownames(diff_res)
+diff_res <- diff_res[,colnames(diff_res)[c(7,1:6)]]
+diff_res <- na.omit(diff_res)
+write.table(diff_res,file = 'Tumor_CTL_mRNA_All_DESeq2_results.xls',sep='\t',row.names = F)
+
+--Linux terminal
+
+##Genome alignment
+cd /path
+bowtie2 -p8 -x mouse_index  -U Tumor_PD1_CTL_csRNA.fastq | samtools view -bS > Tumor_PD1_CTL_csRNA.bam
+
+bowtie2 -p8 -x mouse_index  -f -U rmmu_mirna.fa | samtools view -bS > mmu_mirna.bam
+bowtie2 -p8 -x mouse_index  -f -U mmu_other.fa | samtools view -bS > mmu_other.bam
+bedtools bamtobed -i mmu_mirna.bam > mmu_mirna.gtf
+bedtools bamtobed -i mmu_other.bam > mmu_other.gtf
+bedtools sort -i mmu_mirna.gtf > mmu_mirna_sorted.gtf
+bedtools sort -i mmu_other.gtf > mmu_other_sorted.gtf
+awk '{print $1 "\t" $4 "\t" $5 "\t" $14 "\t" $6 "\t" $7 }' gencode_annotation_simple.gtf > gencode_annotation_simple_mRNA.gtf
+tail -n +6 gencode_annotation_simple_mRNA.gtf > gencode_annotation_simple_mRNA2.gtf
+cat gencode_annotation_simple_mRNA2.gtf mmu_mirna_sorted.gtf mmu_other_sorted.gtf > gencode_annotation_simple_total.gtf
+bedtools sort -i gencode_annotation_simple_total.gtf > gencode_annotation_simple_total_sorted.gtf
+
+cd /path
+bowtie2 -p8 -x mouse_index  -U Tumor_PD1_3_QC.fq | samtools view -bS > Tumor_PD1_3.bam
+bedtools bamtobed -i Tumor_PD1_3.bam > Tumor_PD1_3.bed
+bedtools sort -i Tumor_PD1_3.bed > Tumor_PD1_3_sorted.bed
+bedtools intersect -a Tumor_PD1_3_sorted.bed -b gencode_annotation_simple_total_sorted.gtf -wo > Tumor_PD1_3_sorted_annonation.bed
+head -n 20 Tumor_PD1_3_sorted_annonation.bed
+wc -l Tumor_PD1_3_sorted.bed
+wc -l Tumor_PD1_3_sorted_annonation.bed
+awk '{print $1, $2, $3, $4, $10}' Tumor_PD1_3_sorted_annonation.bed > Tumor_PD1_3_sorted_annonation.txt
+
+--R：
+
+library(tidyverse)
+db <- read.table("Tumor_PD1_3_sorted_annonation.txt", header = F, sep = " ", stringsAsFactors = FALSE)
+db <- db[,4:5]
+barcode <- db$V4
+barcode <- substr(barcode,1,27)
+db$V4 <- barcode
+db$V3 <- paste0(db[, 1], ",", db[, 2])
+db_count <- as.data.frame(table(db$V3))
+names(db_count) <- c("combine", "n")
+db_count <- separate(db_count, combine, into = c("V1", "V2"), sep = ",", remove = TRUE)
+db_count$V3 <- db_count$n
+db_count <- db_count[, -3]
+db_count$V1 <- paste("Tumor_PD1_3_", db_count$V1, sep = "")
+library(Seurat)
+scRNA <- readRDS("Tumor_6sample_MNN_UMAP_Rename.rds")
+Idents(scRNA) <- scRNA$orig.ident
+scRNA <- subset(scRNA,ident="Tumor_PD1_3")
+db_count <- db_count[db_count$V1 %in% colnames(scRNA), ]
+namelist1 <- unique(db_count$V1)
+namelist1 <- sort(namelist1)
+namelist2 <- unique(db_count$V2)
+namelist2 <- sort(namelist2)
+corMat <- matrix(0, nrow = length(namelist1), ncol = length(namelist2))
+rownames(corMat) <- namelist1
+colnames(corMat) <- namelist2
+for(i in 1:nrow(db_count)) {
+    row_idx <- which(rownames(corMat) == db_count$V1[i])
+    col_idx <- which(colnames(corMat) ==  db_count$V2[i])
+    corMat[row_idx, col_idx] <- db_count$V3[i]
+  }
+corMat_sparse <- as(corMat, "dgCMatrix")
+saveRDS(corMat_sparse, "Tumor_PD1_3_csRNA_matrix.rds")
+
+--Lunx terminal：
+
+cd /path
+bowtie2 -p8 -x mouse_index  -U Blood_Ctrl_1_Neu_csRNA.fastq | samtools view -bS > Blood_Ctrl_1_Neu_csRNA.bam
+
+cd /path
+cat Tumor_Ctrl_NK-T_csRNA.fastq Tumor_PD1_NK-T_csRNA.fastq > Tumor_NK-T_csRNA.fastq
+grep '^@' Tumor_NK-T_csRNA.fastq > Tumor_NK-T_csRNA_sequence_names.txt
+awk '{print substr($0,2,27)}' Tumor_NK-T_csRNA_sequence_names.txt > Tumor_NK-T_csRNA_cellbarcodes.txt
+
+--R：
+
+library(Seurat)
+library(tidyverse)
+library(patchwork)
+rm(list=ls())
+setwd("/path")
+lines <- readLines("Tumor_NK-T_csRNA_cellbarcodes.txt")
+scRNA <- readRDS("Tumor_6sample_T_MNN_UMAP_Rename.rds")
+Idents(scRNA) <- scRNA$orig.ident
+head(Idents(scRNA))
+new.cluster.ids <- c("Ctrl","Ctrl","Ctrl","PD-1","PD-1","PD-1")
+names(new.cluster.ids) <- levels(scRNA)
+scRNA <- RenameIdents(scRNA, new.cluster.ids)
+scRNA@meta.data$treat <- Idents(scRNA)
+Idents(scRNA) <- scRNA$subtype
+freq <- table(lines)
+scRNA$csRNA <- freq[substr(colnames(scRNA) ,13,39)] 
+scRNA$csRNA[is.na(scRNA$csRNA)] <- 0
+library(ggpubr)
+plot_data <- FetchData(scRNA, vars = c("treat","subtype","csRNA"))
+plot_data <- plot_data[order(plot_data$treat,plot_data$subtype),]
+write.csv(plot_data,file = 'Tumor_6sample_NK-T_treat&celltype_csRNAcount.csv',quote = T,row.names = T)
+group1 <- plot_data$csRNA[2024:2085] 
+group2 <- plot_data$csRNA[4594:4636]
+t_test_result <- t.test(group1, group2)
+print(t_test_result)

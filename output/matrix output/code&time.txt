@@ -1,0 +1,38 @@
+awk '!seen[$1"\t"$4]++' 参考基因组/gencode.vM37.chr_patch_hapl_scaff.annotation.gtf > 参考基因组/gencode_annotation2.gtf
+awk '!seen[$1"\t"$5]++' 参考基因组/gencode_annotation2.gtf > 参考基因组/gencode_annotation3.gtf
+awk -F ';' '{print $1, $2, $3, $4, $5}' 参考基因组/gencode_annotation3.gtf > 参考基因组/gencode_annotation4.gtf
+awk '!seen[$1"\t"$10]++' 参考基因组/gencode_annotation4.gtf > 参考基因组/gencode_annotation_simple.gtf
+bedtools intersect -a input.bed -b input.gtf -wo > output.bed
+awk '{print $1, $2, $3, $4, $20}’ input.bed > output.txt
+awk '!seen[$1"\t"$2"\t"$3"\t"$4"\t"$5]++’ input.txt > output.txt
+library(tidyverse)
+db <- read.table(“input.txt", header = F, sep = " ", stringsAsFactors = FALSE)
+db <- db[,4:5]
+barcode <- db$V4
+barcode <- substr(barcode,1,27)
+db$V4 <- barcode
+db$V3 <- paste0(db[, 1], ",", db[, 2])
+db_count <- as.data.frame(table(db$V3))
+names(db_count) <- c("combine", "n")
+db_count <- separate(db_count, combine, into = c("V1", "V2"), sep = ",", remove = TRUE)
+db_count$V3 <- db_count$n
+db_count <- db_count[, -3]    
+library(Seurat)
+scRNA <- readRDS(“input.rds")
+db_count <- db_count[db_count$V1 %in% colnames(scRNA), ]
+namelist1 <- unique(db_count$V1)
+namelist1 <- sort(namelist1)
+namelist2 <- unique(db_count$V2)
+namelist2 <- sort(namelist2)
+corMat <- matrix(0, nrow = length(namelist1), ncol = length(namelist2))
+rownames(corMat) <- namelist1
+colnames(corMat) <- namelist2
+for(i in 1:nrow(db_count)) {
+    row_idx <- which(rownames(corMat) == db_count$V1[i])
+    col_idx <- which(colnames(corMat) ==  db_count$V2[i])
+    corMat[row_idx, col_idx] <- db_count$V3[i]
+  }
+corMat_sparse <- as(corMat, "dgCMatrix")
+saveRDS(corMat_sparse, "matrix.rds")
+
+time：30min

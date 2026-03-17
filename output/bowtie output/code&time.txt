@@ -1,0 +1,4 @@
+bowtie2-build genome.fa index
+bowtie2 -p8 -x index -1 input_1.fq.gz -2 input_2.fq.gz | samtools view -bS > output.bam
+
+time：20min

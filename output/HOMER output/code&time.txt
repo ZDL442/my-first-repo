@@ -1,0 +1,4 @@
+perl configureHomer.pl -install mm39
+findMotifsGenome.pl input.bed mm39 HOMER_dir -size 200 -len 8,10,12 -p 16
+
+time：1h
