@@ -1,0 +1,5 @@
+salmon index -t transcripts.fa.gz -i index -k 31
+salmon quant -i index -l A -r input.fq -o output_dir
+awk '$5 != 0’ output_dir/quant.sf > output_dir/quant_filtered.sf
+
+time：1min

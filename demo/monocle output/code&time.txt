@@ -1,0 +1,63 @@
+library(dplyr)
+library(Matrix)
+library(monocle)
+library(Seurat)
+library(patchwork)
+library(SeuratWrappers)
+rm(list = ls())
+setwd("path")
+scRNA <- readRDS("input.rds")
+scRNA <- subset(scRNA,ident=c("Tn","Treg","proTreg","Th"))
+counts <- LayerData(scRNA,assay="RNA",layer="counts")
+scRNA[["RNA3"]] <- CreateAssayObject(counts=counts)
+data <- LayerData(scRNA,assay="RNA",layer="data")
+scRNA[["RNA3"]]@data <- data
+DefaultAssay(scRNA) <- "RNA3"
+scRNA[["RNA"]] <- NULL
+scRNA <- RenameAssays(scRNA,assay.name="RNA3",new.assay.name="RNA")
+seurat_object <- scRNA
+data <- as(as.matrix(seurat_object@assays$RNA@data), 'sparseMatrix')
+pd <- new('AnnotatedDataFrame', data = seurat_object@meta.data)
+fData <- data.frame(gene_short_name = row.names(data), row.names = row.names(data))
+fd <- new('AnnotatedDataFrame', data = fData)
+cds <- newCellDataSet(data,
+                      phenoData = pd,
+                      featureData = fd,
+                      lowerDetectionLimit = 1,
+                      expressionFamily = negbinomial.size());
+cds <- estimateSizeFactors(cds)
+cds <- estimateDispersions(cds)
+cds <- detectGenes(cds, min_expr = 3 )
+expressed_genes <- row.names(subset(fData(cds),
+                                    num_cells_expressed >= 10))
+diff_test_res <- differentialGeneTest(cds[expressed_genes,],
+                                      fullModelFormulaStr = "~ seurat_clusters")
+ordering_genes <- row.names (subset(diff_test_res, qval < 0.01)) 
+cds<- setOrderingFilter(cds, ordering_genes)
+cds <- reduceDimension(cds, 
+                           max_components = 2, 
+                           reduction_method = 'DDRTree')
+cds <- orderCells(cds)
+p1 <- plot_cell_trajectory(cds, color_by = "State")
+ggsave("output.pdf",plot=p1,width = 11.7, height = 10)
+p1 <- plot_cell_trajectory(cds, color_by = "Pseudotime",show_branch_points = FALSE)
+ggsave("output.pdf",plot=p1,width = 11.7, height = 10)
+p1 <- plot_cell_trajectory(cds, color_by = "subtype")
+ggsave("output.pdf",plot=p1,width = 11.7, height = 10)
+p1 <- plot_cell_trajectory(cds, color_by = "orig.ident")+facet_wrap(~orig.ident, ncol = 3)
+ggsave("output.pdf",plot=p1,width = 15, height = 12)
+saveRDS(cds,file="output.rds")
+expressed_genes <- row.names(subset(fData(cds),
+                                    num_cells_expressed >= 50))
+gene_to_cluster <- expressed_genes[grepl("csRNA-", expressed_genes)]
+p1 <- plot_pseudotime_heatmap(cds[gene_to_cluster,],
+                        num_clusters = 2, 
+                        show_rownames = TRUE,
+                        cores = 1,return_heatmap = TRUE,
+                        hmcols = colorRampPalette(c("navy", "white", "firebrick3"))(100))
+ggsave("output.pdf",plot=p1,width = 11.7, height = 10)
+pdf("output.pdf", width = 10, height = 11)
+plot_cell_trajectory(cds,markers = c("csRNA-Cd81","csRNA-Ccdc184","csRNA-Hnrnp11","csRNA-Vmp1","csRNA-Ide"),use_color_gradient=T)+scale_color_gradient2(low = "gray", mid = "red", high = "black",midpoint = 0.5, space = "Lab", na.value = "grey50",guide = "colorbar", aesthetics = "color")
+dev.off()
+
+time：2h
